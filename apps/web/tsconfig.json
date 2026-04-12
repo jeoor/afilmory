@@ -16,7 +16,6 @@
     "noImplicitAny": false,
     "noEmit": true,
     "jsx": "preserve",
-    "ignoreDeprecations": "6.0",
     "paths": {
       "~/*": ["./src/*"],
       "@pkg": ["./package.json"],
