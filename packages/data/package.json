@@ -4,7 +4,6 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./manifest": "./src/photos-manifest.json",
     "./types": "./src/types.ts"
   },
   "dependencies": {
