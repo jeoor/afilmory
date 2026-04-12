@@ -30,7 +30,7 @@ export async function onRequest(context: {
   const url = new URL(context.request.url)
   if (!url.pathname.startsWith('/photos/')) return context.next()
 
-  const {photoId} = context.params
+  const { photoId } = context.params
   if (!photoId) return context.next()
 
   const photoData = ogMap[photoId]
