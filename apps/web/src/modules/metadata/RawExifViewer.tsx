@@ -7,7 +7,7 @@ import {
   DialogTrigger,
   ScrollArea,
 } from '@afilmory/ui'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -292,6 +292,16 @@ export const RawExifViewer: React.FC<RawExifViewerProps> = ({ currentPhoto }) =>
     setIsLoading(false)
   }, [currentPhoto.id])
 
+  // Fallback: format manifest EXIF data as key-value string
+  const manifestFallback = useMemo(() => {
+    const {exif} = currentPhoto
+    if (!exif) return null
+    const entries = Object.entries(exif)
+      .filter(([, v]) => v != null)
+      .map(([k, v]) => `${k}: ${v}`)
+    return entries.length > 0 ? entries.join('\n') : null
+  }, [currentPhoto.exif])
+
   const handleOpenModal = async () => {
     if (rawExifData) {
       setIsOpen(true)
@@ -304,15 +314,23 @@ export const RawExifViewer: React.FC<RawExifViewerProps> = ({ currentPhoto }) =>
       const blob = await response.blob()
       const data = await ExifToolManager.parse(blob, currentPhoto.s3Key)
 
-      setRawExifData(data || null)
+      // Use parsed data if available, otherwise fall back to manifest EXIF
+      const parsedStr = data?.trim()
+      setRawExifData(parsedStr || manifestFallback || null)
       setIsOpen(true)
     } catch (error) {
       console.error('Failed to parse EXIF data:', error)
-      toast.error(
-        t('exif.raw.parse.error', {
-          defaultValue: 'Failed to parse EXIF data',
-        }),
-      )
+      // Fall back to manifest EXIF data on error
+      if (manifestFallback) {
+        setRawExifData(manifestFallback)
+        setIsOpen(true)
+      } else {
+        toast.error(
+          t('exif.raw.parse.error', {
+            defaultValue: 'Failed to parse EXIF data',
+          }),
+        )
+      }
     } finally {
       setIsLoading(false)
     }

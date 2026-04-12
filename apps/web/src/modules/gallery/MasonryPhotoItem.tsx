@@ -4,7 +4,7 @@ import { m } from 'motion/react'
 import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useContextPhotos, usePhotoViewer } from '~/hooks/usePhotoViewer'
+import { useOpenViewer } from '~/hooks/usePhotoViewer'
 import {
   CarbonIsoOutline,
   MaterialSymbolsShutterSpeed,
@@ -17,8 +17,7 @@ import { formatExifData } from '~/modules/metadata'
 import type { PhotoManifest } from '~/types/photo'
 
 export const MasonryPhotoItem = memo(({ data, width }: { data: PhotoManifest; width: number }) => {
-  const photos = useContextPhotos()
-  const photoViewer = usePhotoViewer()
+  const { openViewer } = useOpenViewer()
   const { t } = useTranslation()
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -42,15 +41,12 @@ export const MasonryPhotoItem = memo(({ data, width }: { data: PhotoManifest; wi
     setImageError(true)
   }
 
-  const handleClick = () => {
-    const photoIndex = photos.findIndex((photo) => photo.id === data.id)
-    if (photoIndex !== -1) {
-      const triggerEl =
-        imageRef.current?.parentElement instanceof HTMLElement ? imageRef.current.parentElement : imageRef.current
+  const handleClick = useCallback(() => {
+    const triggerEl =
+      imageRef.current?.parentElement instanceof HTMLElement ? imageRef.current.parentElement : imageRef.current
 
-      photoViewer.openViewer(photoIndex, triggerEl ?? undefined)
-    }
-  }
+    openViewer(data.id, triggerEl ?? undefined)
+  }, [data.id, openViewer])
 
   // 计算基于宽度的高度
   const calculatedHeight = width / data.aspectRatio

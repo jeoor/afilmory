@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process'
 import { rmSync } from 'node:fs'
-import path, { resolve } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -31,7 +31,7 @@ const devPrint = (): PluginOption => ({
   name: 'dev-print',
   configureServer(server: ViteDevServer) {
     server.printUrls = () => {
-      console.info(`  ${green('➜')}  ${dim('Next.js SSR')}: ${cyan('http://localhost:1924')}`)
+      console.info(`  ${green('➜')}  ${dim('Next.js SSR')}: ${cyan('http://localhost:19240')}`)
     }
   },
 })
@@ -50,11 +50,10 @@ const ReactCompilerConfig = {
   /* ... */
 }
 
-const ROOT = fileURLToPath(new URL('./', import.meta.url))
 const routeGenPlugins: PluginOption[] = [
   routeBuilderPlugin({
-    pagePattern: `${resolve(ROOT, './src/pages')}/**/*.tsx`,
-    outputPath: `${resolve(ROOT, './src/generated-routes.ts')}`,
+    pagePattern: './src/pages/**/*.tsx',
+    outputPath: './src/generated-routes.ts',
     enableInDev: true,
 
     segmentGroupOrder: ['main'],
@@ -219,7 +218,7 @@ export default defineConfig(() => {
       devPrint(),
     ],
     server: {
-      port: !DEV_NEXT_JS ? 1924 : 13333, // 1924 年首款 35mm 相机问世
+      port: !DEV_NEXT_JS ? 19240 : 13333, // 1924 年首款 35mm 相机问世
     },
     define: {
       APP_DEV_CWD: JSON.stringify(process.cwd()),

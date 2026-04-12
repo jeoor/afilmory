@@ -13,12 +13,15 @@ class PhotoLoader {
     this.getPhotos = this.getPhotos.bind(this)
     this.getPhoto = this.getPhoto.bind(this)
 
-    this.photos = __MANIFEST__.data as unknown as PhotoManifestItem[]
-    this.cameras = __MANIFEST__.cameras as unknown as CameraInfo[]
-    this.lenses = __MANIFEST__.lenses as unknown as LensInfo[]
+    const manifest = typeof window !== 'undefined' ? (window as any).__MANIFEST__ : (globalThis as any).__MANIFEST__
+    this.photos = (manifest && Array.isArray(manifest.data) ? manifest.data : []) as PhotoManifestItem[]
+    this.cameras = (manifest && Array.isArray(manifest.cameras) ? manifest.cameras : []) as CameraInfo[]
+    this.lenses = (manifest && Array.isArray(manifest.lenses) ? manifest.lenses : []) as LensInfo[]
 
     this.photos.forEach((photo) => {
-      this.photoMap[photo.id] = photo
+      if (photo && photo.id) {
+        this.photoMap[photo.id] = photo
+      }
     })
   }
 

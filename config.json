@@ -1,0 +1,41 @@
+{
+  "name": "敖苛的相册",
+  "title": "敖苛的相册",
+  "description": "敖苛的的相册，记录生活的点滴",
+  "url": "https://gallery.kayro.cn/",
+  "accentColor": "#007bff",
+  "author": {
+    "name": "敖苛",
+    "url": "https://www.kayro.cn/",
+    "avatar": "https://blog.kayro.cn/avatar.webp"
+  },
+  "social": {
+    "github": "https://github.com/jeoor",
+    "twitter": ""
+  },
+  "feed": {
+    "folo": {
+      "challenge": {
+        "feedId": "",
+        "userId": ""
+      }
+    }
+  },
+  "map": [
+    "maplibre"
+  ],
+  "mapStyle": "builtin",
+  "mapProjection": "mercator",
+  "beian": {
+    "icp": {
+      "enabled": true,
+      "number": "冀ICP备2026002497号-1",
+      "link": "https://beian.miit.gov.cn/"
+    },
+    "police": {
+      "enabled": true,
+      "number": "冀公网安备13112502001042号",
+      "code": "13112502001042"
+    }
+  }
+}

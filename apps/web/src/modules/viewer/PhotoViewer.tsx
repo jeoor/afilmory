@@ -19,7 +19,7 @@ import { PhotoInspector } from '~/modules/inspector/PhotoInspector'
 import { ShareModal } from '~/modules/social/ShareModal'
 import type { PhotoManifest } from '~/types/photo'
 
-import { ReactionRail } from '../social'
+import { LikeButton, ReactionRail } from '../social'
 import { PhotoViewerTransitionPreview } from './animations/PhotoViewerTransitionPreview'
 import { usePhotoViewerTransitions } from './animations/usePhotoViewerTransitions'
 import { GalleryThumbnail } from './GalleryThumbnail'
@@ -302,6 +302,7 @@ export const PhotoViewer = ({
                       return (
                         <SwiperSlide key={photo.id} className="flex items-center justify-center" virtualIndex={index}>
                           <ReactionRail photoId={photo.id} />
+                          <LikeButton photoId={photo.id} />
                           <m.div
                             initial={{ opacity: 0.5, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}

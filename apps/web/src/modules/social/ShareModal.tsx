@@ -77,7 +77,7 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
   }, [photo.id, resolvedBaseUrl])
 
   const ogPreviewUrl = useMemo(() => {
-    const path = `/og/${photo.id}`
+    const path = `/og/${photo.id}.png`
     if (!resolvedBaseUrl) return path
     return `${resolvedBaseUrl}${path}`
   }, [photo.id, resolvedBaseUrl])
@@ -143,18 +143,27 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
   }, [ogPreviewUrl, photo.id, t])
 
   const handleSocialShare = useCallback(
-    (urlTemplate: string) => {
+    (option: SocialShareOption) => {
+      // WeChat: copy share text + link
+      if (option.id === 'wechat') {
+        const wechatText = `${shareText} ${shareLink}`
+        navigator.clipboard.writeText(wechatText).then(() => {
+          toast.success(t('photo.share.wechat.copied'))
+        })
+        return
+      }
+
       const encodedUrl = encodeURIComponent(shareLink)
       const encodedTitle = encodeURIComponent(shareTitle)
       const encodedText = encodeURIComponent(shareText)
-      const finalUrl = urlTemplate
+      const finalUrl = option.url
         .replace('{url}', encodedUrl)
         .replace('{title}', encodedTitle)
         .replace('{text}', encodedText)
       window.open(finalUrl, '_blank', 'width=600,height=600')
       dismiss()
     },
-    [dismiss, shareLink, shareText, shareTitle],
+    [dismiss, shareLink, shareText, shareTitle, t],
   )
 
   return (
@@ -205,7 +214,7 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
 
       <div className="space-y-2">
         <p className="text-xs font-medium text-white/50">{t('photo.share.actions')}</p>
-        <div className={clsxm('grid gap-2', canUseNativeShare ? 'grid-cols-6' : 'grid-cols-5')}>
+        <div className={clsxm('grid gap-2', canUseNativeShare ? 'grid-cols-7' : 'grid-cols-6')}>
           {/* Native share button (if available) */}
           {canUseNativeShare && (
             <ShareActionButton
@@ -221,7 +230,7 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
               key={option.id}
               icon={option.icon}
               label={option.label}
-              onClick={() => handleSocialShare(option.url)}
+              onClick={() => handleSocialShare(option)}
             />
           ))}
           {/* Download buttons */}
@@ -277,16 +286,22 @@ async function buildShareFiles(photo: PhotoManifest, blobSrc?: string) {
 function getSocialOptions(t: ReturnType<typeof useTranslation>['t']): SocialShareOption[] {
   return [
     {
-      id: 'twitter',
-      label: 'Twitter',
-      icon: 'i-mingcute-twitter-fill',
-      url: 'https://twitter.com/intent/tweet?text={text}&url={url}',
+      id: 'qq',
+      label: t('photo.share.qq'),
+      icon: 'i-mingcute-qq-fill',
+      url: 'https://connect.qq.com/widget/shareqq/index.html?url={url}&title={title}&summary={text}',
     },
     {
-      id: 'telegram',
-      label: 'Telegram',
-      icon: 'i-mingcute-telegram-line',
-      url: 'https://t.me/share/url?url={url}&text={text}',
+      id: 'wechat',
+      label: t('photo.share.wechat.label'),
+      icon: 'i-mingcute-wechat-fill',
+      url: '', // WeChat uses clipboard copy + toast hint
+    },
+    {
+      id: 'email',
+      label: t('photo.share.email'),
+      icon: 'i-mingcute-mail-fill',
+      url: 'mailto:?subject={title}&body={text}%20{url}',
     },
     {
       id: 'weibo',

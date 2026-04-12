@@ -1,10 +1,15 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { DOMParser } from 'linkedom'
 import type { NextRequest } from 'next/server'
 
 import { injectConfigToDocument } from '~/lib/injectable'
 
 const renderIndex = async () => {
-  const indexHtml = await import('../../index.html').then((m) => m.default)
+  // 直接读取 web 端 index.html
+  const indexPath = join(process.cwd(), 'apps', 'web', 'index.html')
+  const indexHtml = readFileSync(indexPath, 'utf-8')
   const document = new DOMParser().parseFromString(indexHtml, 'text/html')
   injectConfigToDocument(document)
   return new Response(document.documentElement.outerHTML, {

@@ -58,8 +58,8 @@ export default defineBuilderConfig(() => ({
   // plugins: [thumbnailStoragePlugin()],
   plugins: [
     githubRepoSyncPlugin({
+      enable: false,
       repo: {
-        enable: false,
         url: process.env.BUILDER_REPO_URL ?? '',
         token: env.GIT_TOKEN,
         branch: process.env.BUILDER_REPO_BRANCH ?? 'main',

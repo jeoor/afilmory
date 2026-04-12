@@ -5,7 +5,7 @@ export const Component = () => {
     <ScrollArea rootClassName="h-screen">
       <div className="mx-auto w-[60ch] py-8">
         <iframe
-          src="http://localhost:1924/share/iframe?id=DSCF0842"
+          src="http://localhost:19240/share/iframe?id=DSCF0842"
           height={500}
           className="w-full"
           allowTransparency
@@ -13,7 +13,7 @@ export const Component = () => {
         />
 
         <iframe
-          src="http://localhost:1924/share/iframe?id=DSCF0842"
+          src="http://localhost:19240/share/iframe?id=DSCF0842"
           height={400}
           className="w-[400px]"
           allowTransparency
@@ -21,7 +21,7 @@ export const Component = () => {
         />
 
         <iframe
-          src="http://localhost:1924/share/iframe?id=IMG_0030&id=DSCF0842"
+          src="http://localhost:19240/share/iframe?id=IMG_0030&id=DSCF0842"
           height={400}
           className="w-full"
           allowTransparency

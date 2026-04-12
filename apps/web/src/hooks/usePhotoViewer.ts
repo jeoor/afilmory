@@ -120,6 +120,31 @@ export const useContextPhotos = () => {
   return photos
 }
 
+// Lightweight hook for components that only need to OPEN the viewer.
+// Does NOT subscribe to viewerAtom or PhotosContext — avoids re-renders.
+export const useOpenViewer = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const openViewer = useCallback(
+    (photoId: string, element?: HTMLElement) => {
+      setViewer((prev) => ({
+        ...prev,
+        isOpen: true,
+        photoId,
+        triggerElement: element || null,
+      }))
+
+      navigate(`/photos/${photoId}${location.search}`)
+      document.body.style.overflow = 'hidden'
+      trackView(photoId)
+    },
+    [navigate, location.search],
+  )
+
+  return { openViewer }
+}
+
 export const usePhotoViewer = () => {
   const photos = usePhotos()
   const navigate = useNavigate()
