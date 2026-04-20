@@ -3,6 +3,7 @@
   "include": ["/*"],
   "exclude": [
     "/thumbnails/*",
+    "/photos/*",
     "/*.ico",
     "/*.png",
     "/*.jpg",
