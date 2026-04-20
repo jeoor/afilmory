@@ -7,7 +7,7 @@ import { env } from './env.js'
 export default defineBuilderConfig(() => ({
   storage: {
     provider: 'local',
-    basePath: './photos',
+    basePath: './apps/web/public/photos',
     baseUrl: '/photos',
   },
   system: {
