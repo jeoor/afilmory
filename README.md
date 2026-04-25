@@ -70,7 +70,7 @@ For detailed self-hosting instructions, see [DEVELOPMENT.md](./DEVELOPMENT.md) a
 ### EdgeOne Runtime Note
 
 For EdgeOne deployment with KV bindings in this project, use `edge-functions/api/` as the frontend runtime path.
-The matching `cloud-functions/cfapi/` handlers are kept for compatibility and diagnostics, but browser requests should use `/api/*` to avoid Cloud Function gateway timeouts.
+Browser requests use `/api/*` and the project keeps only the EdgeOne function implementation for reactions and OG metadata.
 
 ## 📸 Live Galleries
 

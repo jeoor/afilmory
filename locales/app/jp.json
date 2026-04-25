@@ -343,6 +343,8 @@
   "photo.live.tooltip.desktop.zoom": "ライブバッジをクリックして Live Photo を再生 / ダブルクリックしてズーム",
   "photo.live.tooltip.mobile.main": "ライブバッジをタップしてライブフォトを再生",
   "photo.live.tooltip.mobile.zoom": "ライブバッジをタップしてライブフォトを再生/ダブルタップしてズーム",
+  "photo.reaction.removed": "リアクションを取り消しました",
+  "photo.reaction.success": "リアクションしました",
   "photo.share.actions": "アクション",
   "photo.share.copy.failed": "コピーに失敗しました",
   "photo.share.copy.link": "リンクをコピー",

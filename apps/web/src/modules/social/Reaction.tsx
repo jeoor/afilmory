@@ -158,7 +158,7 @@ export const ReactionRail = ({ className, disabled = false, enabled = true, phot
           reaction,
         })
         await mutate()
-        toast.success(t('photo.reaction.success'))
+        toast.success(t(action === 'remove' ? 'photo.reaction.removed' : 'photo.reaction.success'))
       } catch (error) {
         console.error('Failed to send reaction', error)
         const message = error instanceof Error ? error.message : 'Failed to send reaction'

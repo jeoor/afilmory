@@ -343,6 +343,8 @@
   "photo.live.tooltip.desktop.zoom": "라이브 배지를 클릭하여 라이브 포토 재생 / 더블 클릭하여 확대",
   "photo.live.tooltip.mobile.main": "라이브 배지를 탭하여 라이브 포토 재생",
   "photo.live.tooltip.mobile.zoom": "라이브 배지를 탭하여 라이브 포토 재생/더블 탭하여 확대",
+  "photo.reaction.removed": "반응을 취소했습니다",
+  "photo.reaction.success": "반응을 추가했습니다",
   "photo.share.actions": "작업",
   "photo.share.copy.failed": "복사 실패",
   "photo.share.copy.link": "링크 복사",

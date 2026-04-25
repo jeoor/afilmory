@@ -373,6 +373,7 @@
   "photo.live.tooltip.desktop.zoom": "Click the Live badge to play Live Photo / Double-click to zoom",
   "photo.live.tooltip.mobile.main": "Tap the Live badge to play Live Photo",
   "photo.live.tooltip.mobile.zoom": "Tap the Live badge to play Live Photo / Double-tap to zoom",
+  "photo.reaction.removed": "Reaction removed",
   "photo.reaction.success": "Reaction added",
   "photo.share.actions": "Actions",
   "photo.share.copy.failed": "Copy failed",
