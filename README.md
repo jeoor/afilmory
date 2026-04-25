@@ -67,6 +67,11 @@ pnpm dev
 
 For detailed self-hosting instructions, see [DEVELOPMENT.md](./DEVELOPMENT.md) and [Documentation](https://docs.afilmory.art).
 
+### EdgeOne Runtime Note
+
+For EdgeOne deployment with KV bindings in this project, use `edge-functions/api/` as the frontend runtime path.
+The matching `cloud-functions/cfapi/` handlers are kept for compatibility and diagnostics, but browser requests should use `/api/*` to avoid Cloud Function gateway timeouts.
+
 ## 📸 Live Galleries
 
 See Afilmory in action:

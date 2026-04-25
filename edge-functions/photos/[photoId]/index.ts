@@ -1,4 +1,4 @@
-// EdgeOne Pages Function: Inject per-photo OG meta tags
+// EdgeOne Edge Function: Inject per-photo OG meta tags
 // Intercepts /photos/{photoId} and replaces og:image/twitter:image with photo-specific OG image
 
 import { ogMap } from '../../_data/og-map'

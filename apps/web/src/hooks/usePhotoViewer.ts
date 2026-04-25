@@ -6,7 +6,6 @@ import { useLocation, useNavigate, useParams } from 'react-router'
 import { gallerySettingAtom } from '~/atoms/app'
 import { setViewer, viewerAtom } from '~/atoms/viewer'
 import { jotaiStore } from '~/lib/jotai'
-import { trackView } from '~/lib/tracker'
 import { PhotosContext } from '~/providers/photos-provider'
 
 const data = photoLoader.getPhotos()
@@ -137,7 +136,6 @@ export const useOpenViewer = () => {
 
       navigate(`/photos/${photoId}${location.search}`)
       document.body.style.overflow = 'hidden'
-      trackView(photoId)
     },
     [navigate, location.search],
   )
@@ -179,8 +177,6 @@ export const usePhotoViewer = () => {
 
       // 防止背景滚动
       document.body.style.overflow = 'hidden'
-
-      trackView(photo.id)
     },
     [photos, navigate, location.search],
   )
@@ -222,8 +218,6 @@ export const usePhotoViewer = () => {
 
         // Create history entry for each photo navigation to support browser back/forward
         navigate(`/photos/${photo.id}${location.search}`)
-
-        trackView(photo.id)
       }
     },
     [photos, navigate, location.search, urlPhotoId],

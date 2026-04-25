@@ -32,7 +32,7 @@
       "prettier --ignore-path ./.gitignore --write "
     ],
     "*.{js,ts,cjs,mjs,jsx,tsx,json}": [
-      "eslint --fix"
+      "eslint --fix --no-warn-ignored"
     ],
     "*.{md,mdx}": [
       "pnpm update:lastmodified"

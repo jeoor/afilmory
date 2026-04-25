@@ -7,18 +7,27 @@ class ExifToolManagerStatic {
 
   private exifTool: typeof import('@uswriting/exiftool') | null = null
 
+  private loadPromise: Promise<void> | null = null
+
   async load() {
     if (this.isLoaded) return
-    const exiftool = await import('@uswriting/exiftool')
-    console.info('ExifTool loaded...')
-    this.exifTool = exiftool
-    this.isLoaded = true
 
-    jotaiStore.set(isExiftoolLoadedAtom, true)
-  }
+    if (!this.loadPromise) {
+      this.loadPromise = import('@uswriting/exiftool')
+        .then((exiftool) => {
+          console.info('ExifTool loaded...')
+          this.exifTool = exiftool
+          this.isLoaded = true
 
-  constructor() {
-    this.load()
+          jotaiStore.set(isExiftoolLoadedAtom, true)
+        })
+        .catch((error) => {
+          this.loadPromise = null
+          throw error
+        })
+    }
+
+    await this.loadPromise
   }
 
   async parse(buffer: Blob, filename?: string) {

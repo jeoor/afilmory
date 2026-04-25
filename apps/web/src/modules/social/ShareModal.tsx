@@ -71,12 +71,10 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
   }, [])
 
   const shareLink = useMemo(() => {
-    if (/^https?:\/\//i.test(photo.originalUrl)) {
-      return photo.originalUrl
-    }
-    if (!resolvedBaseUrl) return photo.originalUrl
-    return new URL(photo.originalUrl, `${resolvedBaseUrl}/`).toString()
-  }, [photo.originalUrl, resolvedBaseUrl])
+    const detailPath = `/photos/${encodeURIComponent(photo.id)}`
+    if (!resolvedBaseUrl) return detailPath
+    return new URL(detailPath, `${resolvedBaseUrl}/`).toString()
+  }, [photo.id, resolvedBaseUrl])
 
   const ogPreviewUrl = useMemo(() => {
     const path = `/og/${photo.id}.png`

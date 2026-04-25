@@ -1,0 +1,48 @@
+{
+  "headers": [
+    {
+      "source": "/api/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/cfapi/*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ],
+  "caches": [
+    {
+      "source": "/api/*",
+      "cacheTtl": 0
+    },
+    {
+      "source": "/cfapi/*",
+      "cacheTtl": 0
+    }
+  ],
+  "cloudFunctions": {
+    "nodejs": {
+      "includeFiles": [
+        "cloud-functions-lib/**"
+      ],
+      "maxDuration": 60
+    }
+  }
+}

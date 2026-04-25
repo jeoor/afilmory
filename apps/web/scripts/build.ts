@@ -11,8 +11,12 @@ const rootDir = path.resolve(__dirname, '../../..')
 
 async function main() {
   await precheck()
-  // Generate per-photo OG images and map for EdgeOne functions
-  await $({ cwd: rootDir, stdio: 'inherit' })`tsx scripts/generate-og-map.ts`
+  // Generate per-photo OG images and map for EdgeOne functions unless explicitly disabled.
+  if (process.env.SKIP_PHOTO_OG !== '1') {
+    await $({ cwd: rootDir, stdio: 'inherit' })`tsx scripts/generate-og-map.ts`
+  } else {
+    console.info('Skipping per-photo OG generation because SKIP_PHOTO_OG=1')
+  }
   await $({ cwd: workdir, stdio: 'inherit' })`vite build`
 }
 

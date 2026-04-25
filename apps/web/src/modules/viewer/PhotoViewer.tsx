@@ -417,7 +417,7 @@ export const PhotoViewer = ({
                               className="flex items-center justify-center"
                               virtualIndex={index}
                             >
-                              <ReactionRail photoId={photo.id} />
+                              <ReactionRail photoId={photo.id} enabled={isCurrentImage} />
                               <m.div
                                 initial={{ opacity: 0.5, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}

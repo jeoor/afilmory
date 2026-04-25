@@ -2,7 +2,7 @@ import { clsxm } from '@afilmory/utils'
 import { FluentEmoji, getEmoji } from '@lobehub/fluent-emoji'
 import { produce } from 'immer'
 import type { CSSProperties } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { tv } from 'tailwind-variants'
@@ -11,11 +11,14 @@ import { client } from '~/lib/client'
 
 import { useAnalysis } from '../viewer/hooks/useAnalysis'
 
-const reactions = ['👍', '😍', '🔥', '👏', '🌟', '🙌'] as const
+const reactions = ['\u{1F44D}', '\u{1F60D}', '\u{1F525}', '\u{1F44F}', '\u{1F31F}', '\u{1F64C}'] as const
+const REACTION_STORAGE_KEY = 'afilmory:photo-reactions'
+type Reaction = (typeof reactions)[number]
 
 interface ReactionRailProps {
   className?: string
   disabled?: boolean
+  enabled?: boolean
   photoId: string
   style?: CSSProperties
 }
@@ -37,6 +40,7 @@ const reactionRail = tv({
       'hover:-translate-y-1 hover:scale-110 hover:bg-white/12 hover:text-white hover:backdrop-blur-lg',
       'active:scale-95',
       'data-[active=true]:bg-accent/18 data-[active=true]:text-accent data-[active=true]:backdrop-blur-xl',
+      'data-[pending=true]:bg-accent/18 data-[pending=true]:text-accent data-[pending=true]:backdrop-blur-xl',
       'disabled:pointer-events-none disabled:opacity-40',
     ],
     count:
@@ -44,22 +48,65 @@ const reactionRail = tv({
   },
 })
 
-export const ReactionRail = ({ className, disabled = false, photoId, style }: ReactionRailProps) => {
+function readStoredReactions(photoId: string) {
+  if (typeof window === 'undefined') {
+    return new Set<Reaction>()
+  }
+
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(REACTION_STORAGE_KEY) || '{}') as Record<string, string[]>
+    return new Set(
+      (stored[photoId] || []).filter((reaction): reaction is Reaction => reactions.includes(reaction as Reaction)),
+    )
+  } catch {
+    return new Set<Reaction>()
+  }
+}
+
+function writeStoredReactions(photoId: string, reacted: Set<Reaction>) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(REACTION_STORAGE_KEY) || '{}') as Record<string, string[]>
+    const next = Array.from(reacted)
+
+    if (next.length > 0) {
+      stored[photoId] = next
+    } else {
+      delete stored[photoId]
+    }
+
+    window.localStorage.setItem(REACTION_STORAGE_KEY, JSON.stringify(stored))
+  } catch {
+    // Ignore localStorage failures. The remote count is still updated.
+  }
+}
+
+export const ReactionRail = ({ className, disabled = false, enabled = true, photoId, style }: ReactionRailProps) => {
   const styles = reactionRail()
   const { t } = useTranslation()
-  const { data, mutate } = useAnalysis(photoId)
-  const [activeReactions, setActiveReactions] = useState<Set<(typeof reactions)[number]>>(() => new Set())
-  const activeReactionsRef = useRef(activeReactions)
+  const { data, mutate } = useAnalysis(photoId, enabled)
+  const [pendingReactions, setPendingReactions] = useState<Set<Reaction>>(() => new Set())
+  const [reactedReactions, setReactedReactions] = useState<Set<Reaction>>(() => readStoredReactions(photoId))
 
   useEffect(() => {
-    activeReactionsRef.current = activeReactions
-  }, [activeReactions])
+    setReactedReactions(readStoredReactions(photoId))
+  }, [photoId])
 
   const applyDelta = useCallback(
-    (reaction: (typeof reactions)[number], delta: number) => {
+    (reaction: Reaction, delta: number) => {
       mutate(
         (current) => {
-          if (!current) return current
+          if (!current) {
+            const next = Math.max(0, delta)
+            return {
+              data: {
+                reactions: next > 0 ? { [reaction]: next } : {},
+              },
+            }
+          }
 
           return produce(current, (draft) => {
             const next = Math.max(0, (draft.data.reactions[reaction] || 0) + delta)
@@ -76,50 +123,58 @@ export const ReactionRail = ({ className, disabled = false, photoId, style }: Re
     [mutate],
   )
 
-  const sendReaction = useCallback(
-    async (reaction: (typeof reactions)[number]) => {
+  const toggleReaction = useCallback(
+    async (reaction: Reaction) => {
+      if (pendingReactions.has(reaction)) {
+        return
+      }
+
+      const isActive = reactedReactions.has(reaction)
+      const action = isActive ? 'remove' : 'add'
+      const delta = isActive ? -1 : 1
+      const previousReactions = new Set(reactedReactions)
+      const nextReactions = new Set(reactedReactions)
+
+      if (isActive) {
+        nextReactions.delete(reaction)
+      } else {
+        nextReactions.add(reaction)
+      }
+
+      setPendingReactions((prev) => {
+        const next = new Set(prev)
+        next.add(reaction)
+        return next
+      })
+      setReactedReactions(nextReactions)
+      writeStoredReactions(photoId, nextReactions)
+
+      applyDelta(reaction, delta)
+
       try {
         await client.actReaction({
+          action,
           refKey: photoId,
           reaction,
         })
+        await mutate()
         toast.success(t('photo.reaction.success'))
       } catch (error) {
         console.error('Failed to send reaction', error)
-        toast.error('Failed to send reaction')
-        applyDelta(reaction, -1)
-        setActiveReactions((prev) => {
+        const message = error instanceof Error ? error.message : 'Failed to send reaction'
+        toast.error(String(message))
+        setReactedReactions(previousReactions)
+        writeStoredReactions(photoId, previousReactions)
+        applyDelta(reaction, -delta)
+      } finally {
+        setPendingReactions((prev) => {
           const next = new Set(prev)
           next.delete(reaction)
           return next
         })
       }
     },
-    [applyDelta, photoId, t],
-  )
-
-  const toggleReaction = useCallback(
-    (reaction: (typeof reactions)[number]) => {
-      const isActive = activeReactionsRef.current.has(reaction)
-      const delta = isActive ? -1 : 1
-
-      setActiveReactions((prev) => {
-        const next = new Set(prev)
-        if (isActive) {
-          next.delete(reaction)
-        } else {
-          next.add(reaction)
-        }
-        return next
-      })
-
-      applyDelta(reaction, delta)
-
-      if (!isActive) {
-        void sendReaction(reaction)
-      }
-    },
-    [applyDelta, sendReaction],
+    [applyDelta, mutate, pendingReactions, photoId, reactedReactions, t],
   )
 
   return (
@@ -128,7 +183,8 @@ export const ReactionRail = ({ className, disabled = false, photoId, style }: Re
         <div className={styles.track()}>
           {reactions.map((reaction) => {
             const count = data?.data.reactions[reaction]
-            const isActive = activeReactions.has(reaction)
+            const isPending = pendingReactions.has(reaction)
+            const isActive = reactedReactions.has(reaction)
 
             return (
               <button
@@ -136,9 +192,9 @@ export const ReactionRail = ({ className, disabled = false, photoId, style }: Re
                 type="button"
                 className={styles.item()}
                 data-active={isActive}
-                disabled={disabled}
-                onClick={() => toggleReaction(reaction)}
-                aria-pressed={isActive}
+                data-pending={isPending}
+                disabled={disabled || isPending}
+                onClick={() => void toggleReaction(reaction)}
                 aria-label={`React with ${reaction}`}
               >
                 <FluentEmoji cdn="aliyun" emoji={getEmoji(reaction)!} size={24} type="anim" />
