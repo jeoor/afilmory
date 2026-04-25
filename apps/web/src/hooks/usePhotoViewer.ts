@@ -168,6 +168,8 @@ export const usePhotoViewer = () => {
       setViewer((prev) => ({
         ...prev,
         isOpen: true,
+        openInstanceId: prev.openInstanceId + 1,
+        pendingCloseInstanceId: null,
         photoId: photo.id,
         triggerElement: element || null,
       }))
@@ -185,6 +187,7 @@ export const usePhotoViewer = () => {
     setViewer((prev) => ({
       ...prev,
       isOpen: false,
+      pendingCloseInstanceId: null,
       triggerElement: null,
     }))
 
