@@ -25,5 +25,5 @@ apps/web/public/thumbnails
 # apps/web/public/photos
 apps/web/public/originals
 apps/web/public/og
-# functions/_data/og-map.ts
+edge-functions/_data/og-map.ts
 

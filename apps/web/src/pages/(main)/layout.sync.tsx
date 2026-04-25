@@ -52,6 +52,10 @@ export const Component = () => {
   )
 }
 
+export default Component
+export const loader = undefined
+export const handle = undefined
+
 /**
  * Sync gallery filter settings (tags, cameras, lenses, ratings) with URL search params.
  * This is bidirectional:

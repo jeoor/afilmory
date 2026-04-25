@@ -95,6 +95,11 @@ const BUILD_FOR_SERVER_SERVE = process.env.BUILD_FOR_SERVER_SERVE === '1'
 export default defineConfig(() => {
   return {
     base: BUILD_FOR_SERVER_SERVE ? '/static/web/' : '/',
+    resolve: {
+      alias: {
+        'node:fs/promises': path.resolve(__dirname, 'src/lib/node-fs-promises-browser.ts'),
+      },
+    },
     // Vite MPA configuration
     build: {
       rollupOptions: BUILD_FOR_SERVER_SERVE
