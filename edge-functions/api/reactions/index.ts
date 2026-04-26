@@ -4,6 +4,10 @@ interface PhotoKvBinding {
   get?: (key: string, type?: string) => Promise<KvValue>
 }
 
+interface ResolvedPhotoKvBinding {
+  get: (key: string, type?: string) => Promise<KvValue>
+}
+
 declare const PHOTO_KV: PhotoKvBinding | undefined
 
 interface Env {
@@ -42,7 +46,7 @@ function getBindingName(env: Partial<Env> | undefined) {
   return envValue('PHOTO_KV_BINDING', env) || 'PHOTO_KV'
 }
 
-function resolvePhotoKv(env: Partial<Env> | undefined): PhotoKvBinding | null {
+function resolvePhotoKv(env: Partial<Env> | undefined): ResolvedPhotoKvBinding | null {
   const bindingName = getBindingName(env)
   const directBinding = PHOTO_KV !== undefined ? PHOTO_KV : undefined
   const runtimeBinding = env?.[bindingName as keyof Env] as PhotoKvBinding | undefined
@@ -53,7 +57,7 @@ function resolvePhotoKv(env: Partial<Env> | undefined): PhotoKvBinding | null {
     return null
   }
 
-  return kv
+  return kv as ResolvedPhotoKvBinding
 }
 
 function kvDiagnostics(env: Partial<Env> | undefined) {

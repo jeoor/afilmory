@@ -575,7 +575,7 @@ export const PhotoViewer = ({
 
                       {isMobile && (
                         <m.div
-                          className="bg-material-ultra-thick pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full px-3 py-1 text-xs text-white/70 backdrop-blur-xl"
+                          className="bg-material-ultra-thick pointer-events-none absolute bottom-20 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full px-3 py-1 text-xs text-white/70 backdrop-blur-xl"
                           style={{ opacity: stageHintOpacity, y: stageHintY }}
                         >
                           <i className="i-mingcute-arrow-up-line text-sm" />

@@ -29,7 +29,8 @@ const reactionRail = tv({
     track: [
       'flex flex-row items-center gap-2 px-2 py-1.5',
       'transition-all duration-200 ease-out',
-      'opacity-0 translate-y-2 pointer-events-none',
+      'opacity-100 translate-y-0 pointer-events-auto',
+      'md:opacity-0 md:translate-y-2 md:pointer-events-none',
       'data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0 data-[visible=true]:pointer-events-auto',
       'group-hover/photo-viewer:opacity-100 group-hover/photo-viewer:translate-y-0 group-hover/photo-viewer:pointer-events-auto',
     ],
