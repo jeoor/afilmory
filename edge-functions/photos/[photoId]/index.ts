@@ -3,8 +3,12 @@
 
 import { ogMap } from '../../_data/og-map'
 
+interface FetchEvent extends Event {
+  readonly request: Request
+  respondWith: (response: Response | Promise<Response>) => void
+}
+
 function replaceMetaContent(html: string, property: string, newContent: string): string {
-  // Match: <meta property="og:image" content="..."> or <meta property="twitter:image" content="...">
   return html.replace(
     new RegExp(`(<meta\\s+property="${property.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\s+content=")[^"]*(")`, 'i'),
     `$1${newContent}$2`,
@@ -13,26 +17,35 @@ function replaceMetaContent(html: string, property: string, newContent: string):
 
 function replaceTitle(html: string, newTitle: string): string {
   let result = html
-  // Replace og:title
   result = result.replace(/(<meta\s+property="og:title"\s+content=")[^"]*(")/i, `$1${newTitle}$2`)
-  // Replace twitter:title
   result = result.replace(/(<meta\s+property="twitter:title"\s+content=")[^"]*(")/i, `$1${newTitle}$2`)
-  // Replace <title> tag
   result = result.replace(/(<title>)[^<]*(<\/title>)/i, `$1${newTitle}$2`)
   return result
 }
 
-export async function onRequest(context: { request: Request; params: Record<string, string> }) {
-  const url = new URL(context.request.url)
-  if (!url.pathname.startsWith('/photos/')) {
-    return new Response('Not Found', { status: 404 })
+addEventListener('fetch', ((event: FetchEvent) => {
+  const request = event.request
+  const url = new URL(request.url)
+
+  // Only handle /photos/{photoId} (no file extension)
+  const match = url.pathname.match(/^\/photos\/([^/]+)$/)
+  if (!match) {
+    // Not our route, let it pass through
+    return
   }
 
-  const { photoId } = context.params
-  if (!photoId) {
-    return new Response('Not Found', { status: 404 })
+  const photoId = match[1]
+
+  // Static file requests — don't intercept, forward to origin
+  if (/\.\w+$/.test(photoId)) {
+    // Don't call respondWith → EdgeOne forwards the request to origin
+    return
   }
 
+  event.respondWith(handleRequest(request, url, photoId))
+}) as EventListener)
+
+async function handleRequest(request: Request, url: URL, photoId: string): Promise<Response> {
   const photoData = ogMap[photoId]
   const indexUrl = new URL('/index.html', url)
   const response = await fetch(indexUrl)
@@ -45,10 +58,7 @@ export async function onRequest(context: { request: Request; params: Record<stri
   let html = await response.text()
 
   if (photoData) {
-    // Build absolute OG image URL
     const ogImageUrl = `${url.origin}${photoData.ogImagePath}`
-
-    // Replace meta tags
     html = replaceMetaContent(html, 'og:image', ogImageUrl)
     html = replaceMetaContent(html, 'twitter:image', ogImageUrl)
     html = replaceTitle(html, photoData.title)

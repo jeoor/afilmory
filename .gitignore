@@ -27,3 +27,8 @@ apps/web/public/originals
 apps/web/public/og
 edge-functions/_data/og-map.ts
 
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*
