@@ -1,13 +1,11 @@
 import { readFileSync } from 'node:fs'
 
 import type { PhotoManifestItem } from '@afilmory/builder'
-import { tsImport } from 'tsx/esm/api'
+import { generateRSSFeed } from '@afilmory/utils'
 import type { Plugin } from 'vite'
 
 import type { SiteConfig } from '../../../../site.config'
 import { MANIFEST_PATH } from './__internal__/constants'
-
-const { generateRSSFeed } = await tsImport('@afilmory/utils', import.meta.url)
 
 export function createFeedSitemapPlugin(siteConfig: SiteConfig): Plugin {
   return {
@@ -41,10 +39,8 @@ export function createFeedSitemapPlugin(siteConfig: SiteConfig): Plugin {
           fileName: 'sitemap.xml',
           source: sitemapXml,
         })
-
-        console.info(`Generated RSS feed with ${sortedPhotos.length} photos`)
-        console.info(`Generated sitemap with ${sortedPhotos.length + 1} URLs`)
-      } catch (error) {
+      }
+      catch (error) {
         console.error('Error generating RSS feed and sitemap:', error)
       }
     },
@@ -67,7 +63,7 @@ function generateSitemap(photos: PhotoManifestItem[], config: SiteConfig): strin
     .map((photo) => {
       const lastmod = new Date(photo.lastModified || photo.dateTaken).toISOString()
       return `  <url>
-    <loc>${config.url}/photos/${encodeURIComponent(photo.id)}</loc>
+    <loc>${config.url.replace(/\/+$/, '')}/photos/${encodeURIComponent(photo.id)}/</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

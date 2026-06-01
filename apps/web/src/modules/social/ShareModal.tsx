@@ -73,20 +73,14 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
   }, [])
 
   const shareLink = useMemo(() => {
-    const pathname = `/photos/${photo.id}`
-    if (!resolvedBaseUrl) {
-      return pathname
-    }
-    return `${resolvedBaseUrl}${pathname}`
+    const pathname = `/photos/${encodeURIComponent(photo.id)}/`
+    return resolvePublicUrl(pathname, resolvedBaseUrl)
   }, [photo.id, resolvedBaseUrl])
 
   const ogPreviewUrl = useMemo(() => {
-    const path = `/og/${photo.id}`
-    if (!resolvedBaseUrl) {
-      return path
-    }
-    return `${resolvedBaseUrl}${path}`
-  }, [photo.id, resolvedBaseUrl])
+    const path = photo.ogImageUrl || `/og/${encodeURIComponent(photo.id)}.png`
+    return resolvePublicUrl(path, resolvedBaseUrl)
+  }, [photo.id, photo.ogImageUrl, resolvedBaseUrl])
 
   const shareTitle = photo.title || t('photo.share.default.title')
   const shareText = t('photo.share.text', { title: shareTitle })
@@ -260,6 +254,18 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
 }
 
 ShareSheet.contentClassName = 'max-w-3xl w-full z-1000000'
+
+function resolvePublicUrl(pathOrUrl: string, baseUrl: string) {
+  if (/^https?:\/\//i.test(pathOrUrl)) {
+    return pathOrUrl
+  }
+
+  if (!baseUrl) {
+    return pathOrUrl
+  }
+
+  return new URL(pathOrUrl, `${baseUrl}/`).toString()
+}
 
 async function downloadFile(url: string, filename: string) {
   const response = await fetch(url)

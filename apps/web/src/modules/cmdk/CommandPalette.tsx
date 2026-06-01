@@ -35,12 +35,14 @@ const allCameras = photoLoader.getAllCameras()
 const allLenses = photoLoader.getAllLenses()
 
 const getLocationTokens = (
-  location?: { locationName?: string | null; city?: string | null; country?: string | null } | null,
+  location?: { locationName?: string | null, city?: string | null, country?: string | null } | null,
 ) => {
-  if (!location) return []
+  if (!location) {
+    return []
+  }
 
   const tokens = [location.locationName, location.city, location.country]
-    .map((token) => token?.trim())
+    .map(token => token?.trim())
     .filter((token): token is string => typeof token === 'string' && token.length > 0)
 
   const uniqueTokens: string[] = []
@@ -61,7 +63,9 @@ const fuzzyMatch = (text: string, query: string): boolean => {
   const lowerText = text.toLowerCase()
   const lowerQuery = query.toLowerCase()
 
-  if (lowerText.includes(lowerQuery)) return true
+  if (lowerText.includes(lowerQuery)) {
+    return true
+  }
 
   let queryIndex = 0
   for (let i = 0; i < lowerText.length && queryIndex < lowerQuery.length; i++) {
@@ -75,17 +79,19 @@ const fuzzyMatch = (text: string, query: string): boolean => {
 // Search photos utility
 const searchPhotos = (photos: ReturnType<typeof photoLoader.getPhotos>, query: string) => {
   const lowerQuery = query.trim().toLowerCase()
-  if (!lowerQuery) return []
+  if (!lowerQuery) {
+    return []
+  }
 
   return photos.filter((photo) => {
     const matchesTitle = photo.title?.toLowerCase().includes(lowerQuery)
     const matchesDescription = photo.description?.toLowerCase().includes(lowerQuery)
-    const matchesTags = photo.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
-    const matchesCamera =
-      photo.exif?.Make?.toLowerCase().includes(lowerQuery) || photo.exif?.Model?.toLowerCase().includes(lowerQuery)
+    const matchesTags = photo.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+    const matchesCamera
+      = photo.exif?.Make?.toLowerCase().includes(lowerQuery) || photo.exif?.Model?.toLowerCase().includes(lowerQuery)
     const matchesLens = photo.exif?.LensModel?.toLowerCase().includes(lowerQuery)
     const locationTokens = getLocationTokens(photo.location)
-    const matchesLocation = locationTokens.some((token) => token.toLowerCase().includes(lowerQuery))
+    const matchesLocation = locationTokens.some(token => token.toLowerCase().includes(lowerQuery))
 
     return matchesTitle || matchesDescription || matchesTags || matchesCamera || matchesLens || matchesLocation
   })
@@ -104,7 +110,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
 
   const updateTagFilterMode = useCallback(
     (mode: 'union' | 'intersection') => {
-      setGallerySetting((prev) => ({
+      setGallerySetting(prev => ({
         ...prev,
         tagFilterMode: mode,
       }))
@@ -115,7 +121,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   const handleReset = useCallback(() => {
     setQuery('')
     setSelectedIndex(0)
-    setGallerySetting((prev) => ({
+    setGallerySetting(prev => ({
       ...prev,
       selectedTags: [],
       selectedCameras: [],
@@ -162,9 +168,9 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
           icon: 'i-mingcute-tag-line',
           active: isActive,
           action: () => {
-            setGallerySetting((prev) => ({
+            setGallerySetting(prev => ({
               ...prev,
-              selectedTags: isActive ? prev.selectedTags.filter((t) => t !== tag) : [...prev.selectedTags, tag],
+              selectedTags: isActive ? prev.selectedTags.filter(t => t !== tag) : [...prev.selectedTags, tag],
             }))
           },
           keywords: ['tag', 'filter', tag],
@@ -184,10 +190,10 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
           icon: 'i-mingcute-camera-line',
           active: isActive,
           action: () => {
-            setGallerySetting((prev) => ({
+            setGallerySetting(prev => ({
               ...prev,
               selectedCameras: isActive
-                ? prev.selectedCameras.filter((c) => c !== camera.displayName)
+                ? prev.selectedCameras.filter(c => c !== camera.displayName)
                 : [...prev.selectedCameras, camera.displayName],
             }))
           },
@@ -208,10 +214,10 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
           icon: <MageLens />,
           active: isActive,
           action: () => {
-            setGallerySetting((prev) => ({
+            setGallerySetting(prev => ({
               ...prev,
               selectedLenses: isActive
-                ? prev.selectedLenses.filter((l) => l !== lens.displayName)
+                ? prev.selectedLenses.filter(l => l !== lens.displayName)
                 : [...prev.selectedLenses, lens.displayName],
             }))
           },
@@ -246,7 +252,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
         icon: 'i-mingcute-star-line',
         active: isActive,
         action: () => {
-          setGallerySetting((prev) => ({
+          setGallerySetting(prev => ({
             ...prev,
             selectedRatings: isActive ? null : rating,
           }))
@@ -256,11 +262,11 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
     }
 
     // Clear all filters
-    const hasFilters =
-      gallerySetting.selectedTags.length > 0 ||
-      gallerySetting.selectedCameras.length > 0 ||
-      gallerySetting.selectedLenses.length > 0 ||
-      gallerySetting.selectedRatings !== null
+    const hasFilters
+      = gallerySetting.selectedTags.length > 0
+        || gallerySetting.selectedCameras.length > 0
+        || gallerySetting.selectedLenses.length > 0
+        || gallerySetting.selectedRatings !== null
 
     if (hasFilters) {
       cmds.push({
@@ -270,7 +276,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
         subtitle: 'Clear all active filters',
         icon: 'i-mingcute-close-line',
         action: () => {
-          setGallerySetting((prev) => ({
+          setGallerySetting(prev => ({
             ...prev,
             selectedTags: [],
             selectedCameras: [],
@@ -297,10 +303,10 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
           icon: <img src={photo.thumbnailUrl} alt={photo.title || 'Photo'} className="h-6 w-6 rounded object-cover" />,
           action: () => {
             const allPhotos = photoLoader.getPhotos()
-            const photoIndex = allPhotos.findIndex((p) => p.id === photo.id)
+            const photoIndex = allPhotos.findIndex(p => p.id === photo.id)
             if (photoIndex !== -1) {
               openViewer(photoIndex)
-              navigate(`/photos/${photo.id}`)
+              navigate(`/photos/${encodeURIComponent(photo.id)}/`)
               onClose()
             }
           },
@@ -318,14 +324,14 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   const filteredCommands = useMemo(() => {
     if (!query.trim()) {
       // Show all filters when no query - group by type
-      const activeFilters = commands.filter((cmd) => cmd.active)
-      const allFilters = commands.filter((cmd) => cmd.type === 'filter')
+      const activeFilters = commands.filter(cmd => cmd.active)
+      const allFilters = commands.filter(cmd => cmd.type === 'filter')
 
       // Prioritize active filters, then show all available filters
       const uniqueFilters = new Map<string, Command>()
 
       // First add active filters
-      activeFilters.forEach((cmd) => uniqueFilters.set(cmd.id, cmd))
+      activeFilters.forEach(cmd => uniqueFilters.set(cmd.id, cmd))
 
       // Then add remaining filters
       allFilters.forEach((cmd) => {
@@ -351,12 +357,12 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
       switch (e.key) {
         case 'ArrowDown': {
           e.preventDefault()
-          setSelectedIndex((prev) => Math.min(prev + 1, filteredCommands.length - 1))
+          setSelectedIndex(prev => Math.min(prev + 1, filteredCommands.length - 1))
           break
         }
         case 'ArrowUp': {
           e.preventDefault()
-          setSelectedIndex((prev) => Math.max(prev - 1, 0))
+          setSelectedIndex(prev => Math.max(prev - 1, 0))
           break
         }
         case 'Enter': {
@@ -384,7 +390,9 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
     setSelectedIndex(0)
   }, [filteredCommands.length])
 
-  if (!isOpen) return null
+  if (!isOpen) {
+    return null
+  }
 
   return (
     <div className="fixed inset-0 z-9999 flex items-end justify-center lg:items-start lg:pt-[15vh]" onClick={onClose}>
@@ -400,7 +408,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
           boxShadow:
             '0 8px 32px color-mix(in srgb, var(--color-accent) 8%, transparent), 0 4px 16px color-mix(in srgb, var(--color-accent) 6%, transparent), 0 2px 8px rgba(0, 0, 0, 0.1)',
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {/* Inner glow layer */}
         <div
@@ -419,7 +427,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
             name="search"
             autoComplete="off"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('action.search.placeholder')}
             className="text-text placeholder-text-tertiary flex-1 bg-transparent text-base outline-none focus-visible:outline-none"
@@ -546,7 +554,13 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
                 Select
               </span>
             </div>
-            {filteredCommands.length > 0 && <span>{filteredCommands.length} results</span>}
+            {filteredCommands.length > 0 && (
+              <span>
+                {filteredCommands.length}
+                {' '}
+                results
+              </span>
+            )}
           </div>
         </div>
       </div>

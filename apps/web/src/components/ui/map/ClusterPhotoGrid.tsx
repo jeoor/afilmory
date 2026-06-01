@@ -39,7 +39,7 @@ export const ClusterPhotoGrid = ({ photos, onPhotoClick }: ClusterPhotoGridProps
             className="group relative aspect-square overflow-hidden rounded-lg"
           >
             <Link
-              to={`/photos/${photoMarker.photo.id}`}
+              to={`/photos/${encodeURIComponent(photoMarker.photo.id)}/`}
               target="_blank"
               onClick={(e) => {
                 e.stopPropagation()
@@ -88,7 +88,10 @@ export const ClusterPhotoGrid = ({ photos, onPhotoClick }: ClusterPhotoGridProps
             className="bg-fill-secondary flex aspect-square items-center justify-center rounded-lg"
           >
             <div className="text-center">
-              <div className="text-text text-lg font-bold">+{remainingCount}</div>
+              <div className="text-text text-lg font-bold">
+                +
+                {remainingCount}
+              </div>
               <div className="text-text-secondary text-xs">{t('explory.cluster.more')}</div>
             </div>
           </m.div>
@@ -101,20 +104,28 @@ export const ClusterPhotoGrid = ({ photos, onPhotoClick }: ClusterPhotoGridProps
           <div className="text-text-secondary flex items-center gap-2 text-xs">
             <i className="i-mingcute-location-line text-sm" />
             <span className="font-mono">
-              {Math.abs(photos[0].latitude).toFixed(4)}°{photos[0].latitudeRef || 'N'},{' '}
-              {Math.abs(photos[0].longitude).toFixed(4)}°{photos[0].longitudeRef || 'E'}
+              {Math.abs(photos[0].latitude).toFixed(4)}
+              °
+              {photos[0].latitudeRef || 'N'}
+              ,
+              {' '}
+              {Math.abs(photos[0].longitude).toFixed(4)}
+              °
+              {photos[0].longitudeRef || 'E'}
             </span>
           </div>
 
           {/* 拍摄时间范围 */}
           {(() => {
             const dates = photos
-              .map((p) => p.photo.exif?.DateTimeOriginal)
+              .map(p => p.photo.exif?.DateTimeOriginal)
               .filter(Boolean)
-              .map((d) => new Date(d!))
+              .map(d => new Date(d!))
               .sort((a, b) => a.getTime() - b.getTime())
 
-            if (dates.length === 0) return null
+            if (dates.length === 0) {
+              return null
+            }
 
             const earliest = dates[0]
             const latest = dates.at(-1)
@@ -131,14 +142,14 @@ export const ClusterPhotoGrid = ({ photos, onPhotoClick }: ClusterPhotoGridProps
                         day: 'numeric',
                       })
                     : `${earliest.toLocaleDateString(i18n.language, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })} - ${latest?.toLocaleDateString(i18n.language, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}`}
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })} - ${latest?.toLocaleDateString(i18n.language, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}`}
                 </span>
               </div>
             )

@@ -11,6 +11,7 @@
     "/photos/*.avif",
     "/photos/*.heic",
     "/photos/*.tiff",
+    "/og/*.png",
     "/*.ico",
     "/*.png",
     "/*.jpg",

@@ -85,8 +85,8 @@ export const PhotoMarkerPin = ({ marker, isSelected = false, onClick, onClose }:
           align="center"
           sideOffset={8}
           // 当选中时阻止点击外部关闭
-          onPointerDownOutside={isSelected ? (e) => e.preventDefault() : undefined}
-          onEscapeKeyDown={isSelected ? (e) => e.preventDefault() : undefined}
+          onPointerDownOutside={isSelected ? e => e.preventDefault() : undefined}
+          onEscapeKeyDown={isSelected ? e => e.preventDefault() : undefined}
         >
           <div className="relative">
             {/* 选中时显示关闭按钮 */}
@@ -114,7 +114,7 @@ export const PhotoMarkerPin = ({ marker, isSelected = false, onClick, onClose }:
             <div className="space-y-3 p-4">
               {/* Title with link */}
               <Link
-                to={`/photos/${marker.photo.id}`}
+                to={`/photos/${encodeURIComponent(marker.photo.id)}/`}
                 target="_blank"
                 className="group/link hover:text-blue flex items-center gap-2 transition-colors"
               >
@@ -146,7 +146,9 @@ export const PhotoMarkerPin = ({ marker, isSelected = false, onClick, onClose }:
                   <div className="text-text-secondary flex items-center gap-2 text-xs">
                     <i className="i-mingcute-camera-line text-sm" />
                     <span className="truncate">
-                      {marker.photo.exif.Make} {marker.photo.exif.Model}
+                      {marker.photo.exif.Make}
+                      {' '}
+                      {marker.photo.exif.Model}
                     </span>
                   </div>
                 )}
@@ -155,10 +157,16 @@ export const PhotoMarkerPin = ({ marker, isSelected = false, onClick, onClose }:
                   <div className="flex items-center gap-2">
                     <i className="i-mingcute-location-line text-sm" />
                     <span className="font-mono">
-                      <span>{Math.abs(marker.latitude).toFixed(4)}°</span>
+                      <span>
+                        {Math.abs(marker.latitude).toFixed(4)}
+                        °
+                      </span>
                       <span>{marker.latitudeRef || 'N'}</span>
                       <span>, </span>
-                      <span>{Math.abs(marker.longitude).toFixed(4)}°</span>
+                      <span>
+                        {Math.abs(marker.longitude).toFixed(4)}
+                        °
+                      </span>
                       <span>{marker.longitudeRef || 'E'}</span>
                     </span>
                   </div>
@@ -167,7 +175,10 @@ export const PhotoMarkerPin = ({ marker, isSelected = false, onClick, onClose }:
                       <i className="i-mingcute-mountain-2-line text-sm" />
                       <span className="font-mono">
                         <span>{marker.altitudeRef === 'Below Sea Level' ? '-' : ''}</span>
-                        <span>{Math.abs(marker.altitude).toFixed(1)}m</span>
+                        <span>
+                          {Math.abs(marker.altitude).toFixed(1)}
+                          m
+                        </span>
                       </span>
                     </div>
                   )}

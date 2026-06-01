@@ -12,7 +12,7 @@ import {
 import { formatExifData } from '~/modules/metadata'
 
 const decompressUint8Array = (compressed: string) => {
-  return Uint8Array.from(compressed.match(/.{1,2}/g)!.map((byte) => Number.parseInt(byte, 16)))
+  return Uint8Array.from(compressed.match(/.{1,2}/g)!.map(byte => Number.parseInt(byte, 16)))
 }
 
 interface PhotoItemProps {
@@ -37,7 +37,7 @@ export function PhotoItem({ photo, className }: PhotoItemProps) {
       onClick={() => {
         const siteUrl = window.__SITE_CONFIG__?.url || ''
         if (siteUrl) {
-          window.open(`${siteUrl}/photos/${photo.id}`, '_blank')
+          window.open(`${siteUrl.replace(/\/+$/, '')}/photos/${encodeURIComponent(photo.id)}/`, '_blank')
         }
       }}
       className={cn('group relative block w-full cursor-pointer overflow-hidden text-left', className)}
@@ -88,10 +88,16 @@ export function PhotoItem({ photo, className }: PhotoItemProps) {
               <div>
                 <div className="mb-2 flex flex-wrap gap-2 text-xs text-white/80 opacity-0 group-hover:opacity-100">
                   <span>
-                    {photo.width} × {photo.height}
+                    {photo.width}
+                    {' '}
+                    ×
+                    {photo.height}
                   </span>
                   <span>•</span>
-                  <span>{(photo.size / 1024 / 1024).toFixed(1)}MB</span>
+                  <span>
+                    {(photo.size / 1024 / 1024).toFixed(1)}
+                    MB
+                  </span>
                 </div>
               </div>
             </div>
@@ -99,7 +105,7 @@ export function PhotoItem({ photo, className }: PhotoItemProps) {
             {/* Tags */}
             {photo.tags && photo.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {photo.tags.map((tag) => (
+                {photo.tags.map(tag => (
                   <span
                     key={tag}
                     className="rounded-full bg-white/20 px-2 py-0.5 text-xs text-white/90 opacity-0 backdrop-blur-sm group-hover:opacity-100"
@@ -116,7 +122,10 @@ export function PhotoItem({ photo, className }: PhotoItemProps) {
               {exifData.focalLength35mm && (
                 <div className="flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
                   <StreamlineImageAccessoriesLensesPhotosCameraShutterPicturePhotographyPicturesPhotoLens className="text-white/70" />
-                  <span className="text-white/90">{exifData.focalLength35mm}mm</span>
+                  <span className="text-white/90">
+                    {exifData.focalLength35mm}
+                    mm
+                  </span>
                 </div>
               )}
 
@@ -137,7 +146,10 @@ export function PhotoItem({ photo, className }: PhotoItemProps) {
               {exifData.iso && (
                 <div className="flex items-center gap-1.5 rounded-md bg-white/10 px-2 py-1 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
                   <CarbonIsoOutline className="text-white/70" />
-                  <span className="text-white/90">ISO {exifData.iso}</span>
+                  <span className="text-white/90">
+                    ISO
+                    {exifData.iso}
+                  </span>
                 </div>
               )}
             </div>

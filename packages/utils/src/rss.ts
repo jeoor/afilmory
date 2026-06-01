@@ -26,7 +26,7 @@ export function generateRSSFeed(photos: readonly PhotoManifestItem[], config: Fe
   const channelDescription = escapeXml(config.description ?? config.title ?? 'Photo feed')
   const channelLanguage = escapeXml(config.locale ?? 'en')
 
-  const itemsXml = sortedPhotos.map((photo) => createItemXml(photo, baseUrl)).join('\n')
+  const itemsXml = sortedPhotos.map(photo => createItemXml(photo, baseUrl)).join('\n')
 
   const author = config.author?.name ? escapeXml(config.author.name) : null
   const managingEditor = author && config.author?.url ? `${author} (${config.author.url})` : author
@@ -49,13 +49,13 @@ ${itemsXml}
 }
 
 function createItemXml(photo: PhotoManifestItem, baseUrl: string): string {
-  const link = `${baseUrl}/photos/${encodeURIComponent(photo.id)}`
+  const link = `${baseUrl}/photos/${encodeURIComponent(photo.id)}/`
   const pubDate = new Date(resolveDate(photo)).toUTCString()
   const title = escapeXml(photo.title ?? photo.id)
   const summary = buildDescription(photo)
-  const categories =
-    Array.isArray(photo.tags) && photo.tags.length > 0
-      ? photo.tags.map((tag) => `      <category>${escapeXml(tag)}</category>`).join('\n')
+  const categories
+    = Array.isArray(photo.tags) && photo.tags.length > 0
+      ? photo.tags.map(tag => `      <category>${escapeXml(tag)}</category>`).join('\n')
       : ''
 
   // Add enclosure for thumbnail if available
@@ -85,7 +85,9 @@ ${exifTags}
 }
 
 function buildExifTags(photo: PhotoManifestItem): string {
-  if (!photo.exif) return ''
+  if (!photo.exif) {
+    return ''
+  }
 
   const tags: string[] = []
   const { exif } = photo
@@ -100,14 +102,16 @@ function buildExifTags(photo: PhotoManifestItem): string {
     if (typeof exif.ExposureTime === 'number') {
       if (exif.ExposureTime < 1 && exif.ExposureTime > 0) {
         ss = `1/${Math.round(1 / exif.ExposureTime)}s`
-      } else {
+      }
+      else {
         ss = `${exif.ExposureTime}s`
       }
-    } else if (
-      !ss.endsWith('s') && // If it's a string and doesn't end with s, append it?
+    }
+    else if (
+      !ss.endsWith('s') // If it's a string and doesn't end with s, append it?
       // Actually exiftool usually gives nice strings or numbers.
       // Let's just trust the value but ensure 's' suffix if it looks like a number
-      !Number.isNaN(Number(ss))
+      && !Number.isNaN(Number(ss))
     ) {
       ss = `${ss}s`
     }
@@ -203,7 +207,7 @@ function buildExifTags(photo: PhotoManifestItem): string {
     // Let's skip Contrast for FujiRecipe to avoid confusion unless we have a direct mapping.
   }
 
-  return tags.map((t) => `      ${t}`).join('\n')
+  return tags.map(t => `      ${t}`).join('\n')
 }
 
 function buildDescription(photo: PhotoManifestItem): string {
@@ -243,7 +247,7 @@ function escapeXml(value: string): string {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
+    .replaceAll('\'', '&#39;')
 }
 
 function escapeHtmlBlock(value: string): string {

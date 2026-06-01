@@ -10,6 +10,8 @@ import { PhotosContext } from '~/providers/photos-provider'
 
 const data = photoLoader.getPhotos()
 
+const getPhotoPath = (photoId: string, search = '') => `/photos/${encodeURIComponent(photoId)}/${search}`
+
 // 抽取照片筛选和排序逻辑为独立函数
 const filterAndSortPhotos = (
   selectedTags: string[],
@@ -27,10 +29,11 @@ const filterAndSortPhotos = (
     filteredPhotos = filteredPhotos.filter((photo) => {
       if (tagFilterMode === 'intersection') {
         // 交集模式：照片必须包含所有选中的标签
-        return selectedTags.every((tag) => photo.tags.includes(tag))
-      } else {
+        return selectedTags.every(tag => photo.tags.includes(tag))
+      }
+      else {
         // 并集模式：照片必须包含至少一个选中的标签
-        return selectedTags.some((tag) => photo.tags.includes(tag))
+        return selectedTags.some(tag => photo.tags.includes(tag))
       }
     })
   }
@@ -38,7 +41,9 @@ const filterAndSortPhotos = (
   // Cameras 筛选：照片的相机必须匹配选中的相机之一
   if (selectedCameras.length > 0) {
     filteredPhotos = filteredPhotos.filter((photo) => {
-      if (!photo.exif?.Make || !photo.exif?.Model) return false
+      if (!photo.exif?.Make || !photo.exif?.Model) {
+        return false
+      }
       const cameraDisplayName = `${photo.exif.Make.trim()} ${photo.exif.Model.trim()}`
       return selectedCameras.includes(cameraDisplayName)
     })
@@ -47,7 +52,9 @@ const filterAndSortPhotos = (
   // Lenses 筛选：照片的镜头必须匹配选中的镜头之一
   if (selectedLenses.length > 0) {
     filteredPhotos = filteredPhotos.filter((photo) => {
-      if (!photo.exif?.LensModel) return false
+      if (!photo.exif?.LensModel) {
+        return false
+      }
       const lensModel = photo.exif.LensModel.trim()
       const lensMake = photo.exif.LensMake?.trim()
       const lensDisplayName = lensMake ? `${lensMake} ${lensModel}` : lensModel
@@ -58,7 +65,9 @@ const filterAndSortPhotos = (
   // Ratings 筛选：照片的评分必须大于等于选中的最小阈值
   if (selectedRatings !== null) {
     filteredPhotos = filteredPhotos.filter((photo) => {
-      if (!photo.exif?.Rating) return false
+      if (!photo.exif?.Rating) {
+        return false
+      }
       return photo.exif.Rating >= selectedRatings
     })
   }
@@ -70,13 +79,15 @@ const filterAndSortPhotos = (
 
     if (a.exif && a.exif.DateTimeOriginal) {
       aDateStr = a.exif.DateTimeOriginal as unknown as string
-    } else {
+    }
+    else {
       aDateStr = a.lastModified
     }
 
     if (b.exif && b.exif.DateTimeOriginal) {
       bDateStr = b.exif.DateTimeOriginal as unknown as string
-    } else {
+    }
+    else {
       bDateStr = b.lastModified
     }
 
@@ -101,8 +112,8 @@ export const getFilteredPhotos = () => {
 }
 
 export const usePhotos = () => {
-  const { sortOrder, selectedTags, selectedCameras, selectedLenses, selectedRatings, tagFilterMode } =
-    useAtomValue(gallerySettingAtom)
+  const { sortOrder, selectedTags, selectedCameras, selectedLenses, selectedRatings, tagFilterMode }
+    = useAtomValue(gallerySettingAtom)
 
   const masonryItems = useMemo(() => {
     return filterAndSortPhotos(selectedTags, selectedCameras, selectedLenses, selectedRatings, sortOrder, tagFilterMode)
@@ -127,14 +138,14 @@ export const useOpenViewer = () => {
 
   const openViewer = useCallback(
     (photoId: string, element?: HTMLElement) => {
-      setViewer((prev) => ({
+      setViewer(prev => ({
         ...prev,
         isOpen: true,
         photoId,
         triggerElement: element || null,
       }))
 
-      navigate(`/photos/${photoId}${location.search}`)
+      navigate(getPhotoPath(photoId, location.search))
       document.body.style.overflow = 'hidden'
     },
     [navigate, location.search],
@@ -155,17 +166,21 @@ export const usePhotoViewer = () => {
 
   // Derive currentIndex from URL photo ID
   const currentIndex = useMemo(() => {
-    if (!urlPhotoId) return viewerState.photoId ? photos.findIndex((p) => p.id === viewerState.photoId) : 0
-    const index = photos.findIndex((p) => p.id === urlPhotoId)
+    if (!urlPhotoId) {
+      return viewerState.photoId ? photos.findIndex(p => p.id === viewerState.photoId) : 0
+    }
+    const index = photos.findIndex(p => p.id === urlPhotoId)
     return index !== -1 ? index : 0
   }, [urlPhotoId, photos, viewerState.photoId])
 
   const openViewer = useCallback(
     (index: number, element?: HTMLElement) => {
       const photo = photos[index]
-      if (!photo) return
+      if (!photo) {
+        return
+      }
 
-      setViewer((prev) => ({
+      setViewer(prev => ({
         ...prev,
         isOpen: true,
         openInstanceId: prev.openInstanceId + 1,
@@ -175,7 +190,7 @@ export const usePhotoViewer = () => {
       }))
 
       // Navigate to photo URL (creates history entry)
-      navigate(`/photos/${photo.id}${location.search}`)
+      navigate(getPhotoPath(photo.id, location.search))
 
       // 防止背景滚动
       document.body.style.overflow = 'hidden'
@@ -184,7 +199,7 @@ export const usePhotoViewer = () => {
   )
 
   const closeViewer = useCallback(() => {
-    setViewer((prev) => ({
+    setViewer(prev => ({
       ...prev,
       isOpen: false,
       pendingCloseInstanceId: null,
@@ -196,7 +211,8 @@ export const usePhotoViewer = () => {
     const isExploryPath = location.pathname.includes('/explory')
     if (isExploryPath) {
       navigate(`/explory${location.search}`)
-    } else {
+    }
+    else {
       navigate(`/${location.search}`)
     }
 
@@ -214,13 +230,13 @@ export const usePhotoViewer = () => {
           return
         }
 
-        setViewer((prev) => ({
+        setViewer(prev => ({
           ...prev,
           photoId: photo.id,
         }))
 
         // Create history entry for each photo navigation to support browser back/forward
-        navigate(`/photos/${photo.id}${location.search}`)
+        navigate(getPhotoPath(photo.id, location.search))
       }
     },
     [photos, navigate, location.search, urlPhotoId],
