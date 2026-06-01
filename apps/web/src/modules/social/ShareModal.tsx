@@ -44,7 +44,9 @@ export const ShareModal = ({ photo, trigger, blobSrc }: ShareModalTriggerProps) 
       onClick: (event: MouseEvent<HTMLElement>) => {
         // @ts-expect-error - trigger is a valid React element
         trigger.props?.onClick?.(event)
-        if (event.defaultPrevented) return
+        if (event.defaultPrevented) {
+          return
+        }
         handleOpen()
       },
     })
@@ -71,14 +73,18 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
   }, [])
 
   const shareLink = useMemo(() => {
-    const detailPath = `/photos/${encodeURIComponent(photo.id)}`
-    if (!resolvedBaseUrl) return detailPath
-    return new URL(detailPath, `${resolvedBaseUrl}/`).toString()
+    const pathname = `/photos/${photo.id}`
+    if (!resolvedBaseUrl) {
+      return pathname
+    }
+    return `${resolvedBaseUrl}${pathname}`
   }, [photo.id, resolvedBaseUrl])
 
   const ogPreviewUrl = useMemo(() => {
-    const path = `/og/${photo.id}.png`
-    if (!resolvedBaseUrl) return path
+    const path = `/og/${photo.id}`
+    if (!resolvedBaseUrl) {
+      return path
+    }
     return `${resolvedBaseUrl}${path}`
   }, [photo.id, resolvedBaseUrl])
 
@@ -90,7 +96,9 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
   const socialOptions = useMemo(() => getSocialOptions(t), [t])
 
   const handleNativeShare = useCallback(async () => {
-    if (!canUseNativeShare) return
+    if (!canUseNativeShare) {
+      return
+    }
 
     try {
       const files = await buildShareFiles(photo, blobSrc)
@@ -101,7 +109,8 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
         ...(files.length > 0 ? { files } : {}),
       })
       dismiss()
-    } catch {
+    }
+    catch {
       await navigator.clipboard.writeText(shareLink)
       toast.success(t('photo.share.linkCopied'))
       dismiss()
@@ -112,7 +121,8 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
     try {
       await navigator.clipboard.writeText(shareLink)
       toast.success(t('photo.share.linkCopied'))
-    } catch {
+    }
+    catch {
       toast.error(t('photo.share.copy.failed'))
       throw new Error('Failed to copy')
     }
@@ -123,9 +133,11 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
       setIsDownloadingOriginal(true)
       await downloadFile(photo.originalUrl, `${photo.id}.jpg`)
       toast.success(t('photo.share.download.original'))
-    } catch {
+    }
+    catch {
       toast.error(t('photo.share.copy.failed'))
-    } finally {
+    }
+    finally {
       setIsDownloadingOriginal(false)
     }
   }, [photo.id, photo.originalUrl, t])
@@ -135,35 +147,28 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
       setIsDownloadingPreview(true)
       await downloadFile(ogPreviewUrl, `${photo.id}-og.png`)
       toast.success(t('photo.share.downloadPreview'))
-    } catch {
+    }
+    catch {
       toast.error(t('photo.share.copy.failed'))
-    } finally {
+    }
+    finally {
       setIsDownloadingPreview(false)
     }
   }, [ogPreviewUrl, photo.id, t])
 
   const handleSocialShare = useCallback(
-    (option: SocialShareOption) => {
-      // WeChat: copy share text + link
-      if (option.id === 'wechat') {
-        const wechatText = `${shareText} ${shareLink}`
-        navigator.clipboard.writeText(wechatText).then(() => {
-          toast.success(t('photo.share.wechat.copied'))
-        })
-        return
-      }
-
+    (urlTemplate: string) => {
       const encodedUrl = encodeURIComponent(shareLink)
       const encodedTitle = encodeURIComponent(shareTitle)
       const encodedText = encodeURIComponent(shareText)
-      const finalUrl = option.url
+      const finalUrl = urlTemplate
         .replace('{url}', encodedUrl)
         .replace('{title}', encodedTitle)
         .replace('{text}', encodedText)
       window.open(finalUrl, '_blank', 'width=600,height=600')
       dismiss()
     },
-    [dismiss, shareLink, shareText, shareTitle, t],
+    [dismiss, shareLink, shareText, shareTitle],
   )
 
   return (
@@ -214,7 +219,7 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
 
       <div className="space-y-2">
         <p className="text-xs font-medium text-white/50">{t('photo.share.actions')}</p>
-        <div className={clsxm('grid gap-2', canUseNativeShare ? 'grid-cols-7' : 'grid-cols-6')}>
+        <div className={clsxm('grid gap-2', canUseNativeShare ? 'grid-cols-6' : 'grid-cols-5')}>
           {/* Native share button (if available) */}
           {canUseNativeShare && (
             <ShareActionButton
@@ -225,12 +230,12 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
             />
           )}
           {/* Social share buttons */}
-          {socialOptions.map((option) => (
+          {socialOptions.map(option => (
             <ShareActionButton
               key={option.id}
               icon={option.icon}
               label={option.label}
-              onClick={() => handleSocialShare(option)}
+              onClick={() => handleSocialShare(option.url)}
             />
           ))}
           {/* Download buttons */}
@@ -242,7 +247,7 @@ const ShareSheet: ModalComponent<ShareSheetProps> = ({ photo, blobSrc, dismiss }
             title={t('photo.share.download.original')}
           />
           <ShareActionButton
-            icon="i-lucide-image"
+            icon="i-mingcute-pic-line"
             label={isDownloadingPreview ? '…' : 'Preview'}
             onClick={handleDownloadPreview}
             disabled={isDownloadingPreview}
@@ -278,7 +283,8 @@ async function buildShareFiles(photo: PhotoManifest, blobSrc?: string) {
     const response = await fetch(imageUrl)
     const blob = await response.blob()
     return [new File([blob], `${photo.title || photo.id}.jpg`, { type: blob.type || 'image/jpeg' })]
-  } catch {
+  }
+  catch {
     return []
   }
 }
@@ -286,22 +292,16 @@ async function buildShareFiles(photo: PhotoManifest, blobSrc?: string) {
 function getSocialOptions(t: ReturnType<typeof useTranslation>['t']): SocialShareOption[] {
   return [
     {
-      id: 'qq',
-      label: t('photo.share.qq'),
-      icon: 'i-mingcute-qq-fill',
-      url: 'https://connect.qq.com/widget/shareqq/index.html?url={url}&title={title}&summary={text}',
+      id: 'twitter',
+      label: 'Twitter',
+      icon: 'i-mingcute-twitter-fill',
+      url: 'https://twitter.com/intent/tweet?text={text}&url={url}',
     },
     {
-      id: 'wechat',
-      label: t('photo.share.wechat.label'),
-      icon: 'i-mingcute-wechat-fill',
-      url: '', // WeChat uses clipboard copy + toast hint
-    },
-    {
-      id: 'email',
-      label: t('photo.share.email'),
-      icon: 'i-mingcute-mail-fill',
-      url: 'mailto:?subject={title}&body={text}%20{url}',
+      id: 'telegram',
+      label: 'Telegram',
+      icon: 'i-mingcute-telegram-line',
+      url: 'https://t.me/share/url?url={url}&text={text}',
     },
     {
       id: 'weibo',

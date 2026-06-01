@@ -5,17 +5,17 @@ import 'swiper/css/navigation'
 
 import { Thumbhash } from '@afilmory/ui'
 import { Spring } from '@afilmory/utils'
+import type { AnimationFrameRect, MobileViewerDismissSnapshot } from '@afilmory/viewer-motion'
 import {
-  type AnimationFrameRect,
   createInspectorSheetPresentation,
   DEFAULT_MOBILE_VIEWER_MEDIA_TRANSFORM_ORIGIN,
-  type MobileViewerDismissSnapshot,
   projectDismissedViewerMediaFrame,
   resolveInspectorSheetHeight,
   SharedElementTransitionPreview,
   useViewerMobileInteractions,
   useViewerTransitions,
 } from '@afilmory/viewer-motion'
+import { PanelRightOpen } from 'lucide-react'
 import { AnimatePresence, m } from 'motion/react'
 import { Fragment, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -118,8 +118,8 @@ export const PhotoViewer = ({
         return
       }
 
-      const viewportRect =
-        containerRef.current?.getBoundingClientRect() ?? new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+      const viewportRect
+        = containerRef.current?.getBoundingClientRect() ?? new DOMRect(0, 0, window.innerWidth, window.innerHeight)
       const projectedFrame = projectDismissedViewerMediaFrame({
         item: {
           width: currentPhoto.width,
@@ -234,7 +234,8 @@ export const PhotoViewer = ({
       if (isImageZoomed || (isMobile && (isVerticalGestureActive || isInspectorVisible))) {
         // 图片被缩放时，禁用 Swiper 的触摸滑动
         swiperRef.current.allowTouchMove = false
-      } else {
+      }
+      else {
         // 图片未缩放时，启用 Swiper 的触摸滑动
         swiperRef.current.allowTouchMove = true
       }
@@ -269,7 +270,9 @@ export const PhotoViewer = ({
 
   // 键盘导航
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      return
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       switch (event.key) {
@@ -303,7 +306,9 @@ export const PhotoViewer = ({
     }
   }, [shouldMountImageStage])
 
-  if (!currentPhoto) return null
+  if (!currentPhoto) {
+    return null
+  }
 
   return (
     <>
@@ -408,7 +413,7 @@ export const PhotoViewer = ({
                         <ShareModal
                           photo={currentPhoto}
                           blobSrc={currentBlobSrc || undefined}
-                          trigger={
+                          trigger={(
                             <button
                               type="button"
                               disabled={!isMobileChromeInteractive}
@@ -417,7 +422,7 @@ export const PhotoViewer = ({
                             >
                               <i className="i-mingcute-share-2-line" />
                             </button>
-                          }
+                          )}
                         />
 
                         {/* 展开信息面板（桌面端在折叠时显示） */}
@@ -428,7 +433,7 @@ export const PhotoViewer = ({
                             onClick={() => setIsDesktopInspectorVisible(true)}
                             title={t('inspector.tab.info')}
                           >
-                            <i className="i-lucide-panel-right-open" />
+                            <PanelRightOpen className="size-4" />
                           </button>
                         )}
 
@@ -484,8 +489,8 @@ export const PhotoViewer = ({
                           virtual
                           onSwiper={(swiper) => {
                             swiperRef.current = swiper
-                            swiper.allowTouchMove =
-                              !isImageZoomed && !(isMobile && (isVerticalGestureActive || isInspectorVisible))
+                            swiper.allowTouchMove
+                              = !isImageZoomed && !(isMobile && (isVerticalGestureActive || isInspectorVisible))
                           }}
                           onSlideChange={(swiper) => {
                             onIndexChange(swiper.activeIndex)
@@ -592,20 +597,20 @@ export const PhotoViewer = ({
                           {currentIndex > 0 && (
                             <button
                               type="button"
-                              className={`bg-material-medium absolute top-1/2 left-4 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-white opacity-0 backdrop-blur-sm duration-200 group-hover/photo-viewer:opacity-100 hover:bg-black/40`}
+                              className="bg-material-medium absolute top-1/2 left-4 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-white opacity-0 backdrop-blur-sm duration-200 group-hover/photo-viewer:opacity-100 hover:bg-black/40"
                               onClick={handlePrevious}
                             >
-                              <i className={`i-mingcute-left-line text-xl`} />
+                              <i className="i-mingcute-left-line text-xl" />
                             </button>
                           )}
 
                           {currentIndex < photos.length - 1 && (
                             <button
                               type="button"
-                              className={`bg-material-medium absolute top-1/2 right-4 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-white opacity-0 backdrop-blur-sm duration-200 group-hover/photo-viewer:opacity-100 hover:bg-black/40`}
+                              className="bg-material-medium absolute top-1/2 right-4 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-white opacity-0 backdrop-blur-sm duration-200 group-hover/photo-viewer:opacity-100 hover:bg-black/40"
                               onClick={handleNext}
                             >
-                              <i className={`i-mingcute-right-line text-xl`} />
+                              <i className="i-mingcute-right-line text-xl" />
                             </button>
                           )}
                         </Fragment>
@@ -662,7 +667,7 @@ export const PhotoViewer = ({
           transition={entryTransition}
           onReady={handleEntryTransitionReady}
           onComplete={handleEntryTransitionComplete}
-          renderPlaceholder={(thumbHash) => (
+          renderPlaceholder={thumbHash => (
             <Thumbhash thumbHash={thumbHash} className="pointer-events-none absolute inset-0 h-full w-full" />
           )}
         />
@@ -672,7 +677,7 @@ export const PhotoViewer = ({
           key={`${exitTransition.variant}-${exitTransition.itemId}`}
           transition={exitTransition}
           onComplete={handleExitAnimationComplete}
-          renderPlaceholder={(thumbHash) => (
+          renderPlaceholder={thumbHash => (
             <Thumbhash thumbHash={thumbHash} className="pointer-events-none absolute inset-0 h-full w-full" />
           )}
         />

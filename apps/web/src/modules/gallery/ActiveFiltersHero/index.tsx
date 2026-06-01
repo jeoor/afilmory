@@ -1,5 +1,7 @@
 import { Spring } from '@afilmory/utils'
 import { useAtom, useSetAtom } from 'jotai'
+import type { LucideIcon } from 'lucide-react'
+import { Aperture, Camera, GitBranch, Star, Tag } from 'lucide-react'
 import { m as motion } from 'motion/react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,7 +15,9 @@ import { HeroActions } from './HeroActions'
 
 // 从照片中随机选择一些作为背景拼贴
 const getRandomPhotos = (photos: PhotoManifest[], count = 12): PhotoManifest[] => {
-  if (photos.length === 0) return []
+  if (photos.length === 0) {
+    return []
+  }
   const shuffled = [...photos].sort(() => Math.random() - 0.5)
   return shuffled.slice(0, Math.min(count, photos.length))
 }
@@ -28,7 +32,9 @@ export const ActiveFiltersHero = () => {
   const backgroundPhotos = useMemo(() => getRandomPhotos(photos, 12), [photos])
 
   const summarizeValues = (items: string[], limit = 3) => {
-    if (items.length === 0) return ''
+    if (items.length === 0) {
+      return ''
+    }
     const summary = items.slice(0, limit).join(' · ')
     const remaining = items.length - limit
     return remaining > 0 ? `${summary} +${remaining}` : summary
@@ -48,7 +54,9 @@ export const ActiveFiltersHero = () => {
     if (gallerySetting.selectedRatings !== null) {
       fragments.push(`${gallerySetting.selectedRatings}+ ★`)
     }
-    if (fragments.length === 0) return t('gallery.filter.active')
+    if (fragments.length === 0) {
+      return t('gallery.filter.active')
+    }
     return fragments.slice(0, 2).join(' · ')
   }, [
     gallerySetting.selectedCameras,
@@ -59,11 +67,11 @@ export const ActiveFiltersHero = () => {
   ])
 
   const infoItems = useMemo(() => {
-    const items: Array<{ key: string; icon: string; label: string; value: string }> = []
+    const items: Array<{ key: string, icon: LucideIcon, label: string, value: string }> = []
     if (gallerySetting.selectedTags.length > 0) {
       items.push({
         key: 'tags',
-        icon: 'i-lucide-tag',
+        icon: Tag,
         label: t('exif.tags'),
         value: gallerySetting.selectedTags.join(' · '),
       })
@@ -71,7 +79,7 @@ export const ActiveFiltersHero = () => {
     if (gallerySetting.selectedCameras.length > 0) {
       items.push({
         key: 'cameras',
-        icon: 'i-lucide-camera',
+        icon: Camera,
         label: t('exif.camera'),
         value: gallerySetting.selectedCameras.join(' · '),
       })
@@ -79,7 +87,7 @@ export const ActiveFiltersHero = () => {
     if (gallerySetting.selectedLenses.length > 0) {
       items.push({
         key: 'lenses',
-        icon: 'i-lucide-aperture',
+        icon: Aperture,
         label: t('exif.lens'),
         value: gallerySetting.selectedLenses.join(' · '),
       })
@@ -87,7 +95,7 @@ export const ActiveFiltersHero = () => {
     if (gallerySetting.selectedRatings !== null) {
       items.push({
         key: 'rating',
-        icon: 'i-lucide-star',
+        icon: Star,
         label: t('exif.rating'),
         value: `${gallerySetting.selectedRatings}+`,
       })
@@ -101,43 +109,43 @@ export const ActiveFiltersHero = () => {
     t,
   ])
 
-  const tagModeLabel =
-    gallerySetting.selectedTags.length > 1
+  const tagModeLabel
+    = gallerySetting.selectedTags.length > 1
       ? gallerySetting.tagFilterMode === 'intersection'
         ? t('action.tag.mode.and')
         : t('action.tag.mode.or')
       : null
 
   const handleRemoveTag = (tag: string) => {
-    setGallerySetting((prev) => ({
+    setGallerySetting(prev => ({
       ...prev,
-      selectedTags: prev.selectedTags.filter((t) => t !== tag),
+      selectedTags: prev.selectedTags.filter(t => t !== tag),
     }))
   }
 
   const handleRemoveCamera = (camera: string) => {
-    setGallerySetting((prev) => ({
+    setGallerySetting(prev => ({
       ...prev,
-      selectedCameras: prev.selectedCameras.filter((c) => c !== camera),
+      selectedCameras: prev.selectedCameras.filter(c => c !== camera),
     }))
   }
 
   const handleRemoveLens = (lens: string) => {
-    setGallerySetting((prev) => ({
+    setGallerySetting(prev => ({
       ...prev,
-      selectedLenses: prev.selectedLenses.filter((l) => l !== lens),
+      selectedLenses: prev.selectedLenses.filter(l => l !== lens),
     }))
   }
 
   const handleRemoveRating = () => {
-    setGallerySetting((prev) => ({
+    setGallerySetting(prev => ({
       ...prev,
       selectedRatings: null,
     }))
   }
 
   const handleClearAll = () => {
-    setGallerySetting((prev) => ({
+    setGallerySetting(prev => ({
       ...prev,
       selectedTags: [],
       selectedCameras: [],
@@ -198,13 +206,13 @@ export const ActiveFiltersHero = () => {
 
           {infoItems.length > 0 && (
             <div className="mt-8 grid w-full max-w-4xl grid-cols-1 gap-3 text-left sm:grid-cols-2 lg:grid-cols-4">
-              {infoItems.map((item) => (
+              {infoItems.map(item => (
                 <div
                   key={item.key}
                   className="flex h-full flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white/90 backdrop-blur"
                 >
                   <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.3em] text-white/50 uppercase">
-                    <i className={`${item.icon} text-sm text-white/70`} />
+                    <item.icon className="size-3.5 text-white/70" />
                     <span>{item.label}</span>
                   </div>
                   <p className="line-clamp-2 text-base font-semibold text-white">{item.value}</p>
@@ -215,9 +223,12 @@ export const ActiveFiltersHero = () => {
 
           {tagModeLabel && (
             <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-[0.3em] text-white/65 uppercase backdrop-blur">
-              <i className="i-lucide-git-branch text-sm text-white/70" />
+              <GitBranch className="size-3.5 text-white/70" />
               <span>
-                {t('action.tag.filter')} · {tagModeLabel}
+                {t('action.tag.filter')}
+                {' '}
+                ·
+                {tagModeLabel}
               </span>
             </div>
           )}
