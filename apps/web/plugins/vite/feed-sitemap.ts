@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 
 import type { PhotoManifestItem } from '@afilmory/builder'
-import { generateRSSFeed } from '@afilmory/utils'
+import { tsImport } from 'tsx/esm/api'
 import type { Plugin } from 'vite'
 
 import type { SiteConfig } from '../../../../site.config'
@@ -11,8 +11,9 @@ export function createFeedSitemapPlugin(siteConfig: SiteConfig): Plugin {
   return {
     name: 'feed-sitemap-generator',
     apply: 'build',
-    generateBundle() {
+    async generateBundle() {
       try {
+        const { generateRSSFeed } = await tsImport('@afilmory/utils', import.meta.url)
         const photosData: PhotoManifestItem[] = JSON.parse(readFileSync(MANIFEST_PATH, 'utf-8')).data
 
         // Sort photos by date taken (newest first)
