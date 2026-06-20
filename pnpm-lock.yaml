@@ -103,6 +103,9 @@ importers:
       '@innei/prettier':
         specifier: 1.0.0
         version: 1.0.0(@vue/compiler-sfc@3.5.38)
+      '@types/geojson':
+        specifier: ^7946.0.16
+        version: 7946.0.16
       '@types/node':
         specifier: 25.9.3
         version: 25.9.3

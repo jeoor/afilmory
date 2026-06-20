@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+import type { Feature } from 'geojson'
 import * as React from 'react'
 import { lazy } from 'react'
 import type { MapRef } from 'react-map-gl/maplibre'
@@ -6,7 +8,7 @@ import type { BaseMapProps, PhotoMarker } from '~/types/map'
 
 import type { MapAdapter } from './MapProvider'
 
-const Maplibre = lazy(() => import('~/components/ui/map/MapLibre').then((m) => ({ default: m.Maplibre })))
+const Maplibre = lazy(() => import('~/components/ui/map/MapLibre').then(m => ({ default: m.Maplibre })))
 /**
  * MapLibre map adapter implementation
  * This adapts MapLibre to work with our generic map provider system
@@ -55,11 +57,13 @@ export const MapLibreMapComponent: React.FC<BaseMapProps> = ({
         features?: maplibregl.GeoJSONFeature[]
       },
     ) => {
-      if (!handlers?.onGeoJsonClick) return
+      if (!handlers?.onGeoJsonClick) {
+        return
+      }
 
       const feature = event.features?.[0]
       if (feature) {
-        handlers.onGeoJsonClick(feature as GeoJSON.Feature)
+        handlers.onGeoJsonClick(feature as Feature)
       }
     },
     [handlers],
