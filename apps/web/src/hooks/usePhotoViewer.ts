@@ -3,9 +3,11 @@ import { useAtomValue } from 'jotai'
 import { use, useCallback, useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 
+import type { DateRangeFilter } from '~/atoms/app'
 import { gallerySettingAtom } from '~/atoms/app'
 import { setViewer, viewerAtom } from '~/atoms/viewer'
 import { jotaiStore } from '~/lib/jotai'
+import { getPhotoDateMs, getRangeEndMs, getRangeStartMs } from '~/modules/gallery/dateRangeUtils'
 import { PhotosContext } from '~/providers/photos-provider'
 
 const data = photoLoader.getPhotos()
@@ -13,11 +15,16 @@ const data = photoLoader.getPhotos()
 const getPhotoPath = (photoId: string, search = '') => `/photos/${encodeURIComponent(photoId)}/${search}`
 
 // 抽取照片筛选和排序逻辑为独立函数
+// Note: filter uses parsed-instant comparison via getPhotoDateMs, while sort
+// below uses a lexical string compare. For well-formed ISO/EXIF datetimes the
+// two orderings agree; they may diverge for EXIF strings carrying explicit
+// timezone offsets — filter intentionally honors viewer-local calendar day.
 const filterAndSortPhotos = (
   selectedTags: string[],
   selectedCameras: string[],
   selectedLenses: string[],
   selectedRatings: number | null,
+  selectedDateRange: DateRangeFilter | null,
   sortOrder: 'asc' | 'desc',
   tagFilterMode: 'union' | 'intersection' = 'union',
 ) => {
@@ -72,6 +79,19 @@ const filterAndSortPhotos = (
     })
   }
 
+  // Date range 筛选：照片拍摄日须落入选定区间（viewer-local 日历日）
+  if (selectedDateRange && (selectedDateRange.from || selectedDateRange.to)) {
+    const minMs = selectedDateRange.from ? getRangeStartMs(selectedDateRange.from) : -Infinity
+    const maxMs = selectedDateRange.to ? getRangeEndMs(selectedDateRange.to) : Infinity
+    filteredPhotos = filteredPhotos.filter((photo) => {
+      const ts = getPhotoDateMs(photo)
+      if (ts === null) {
+        return false
+      }
+      return ts >= minMs && ts <= maxMs
+    })
+  }
+
   // 然后排序
   const sortedPhotos = filteredPhotos.toSorted((a, b) => {
     let aDateStr = ''
@@ -106,18 +126,34 @@ export const getFilteredPhotos = () => {
     currentGallerySetting.selectedCameras,
     currentGallerySetting.selectedLenses,
     currentGallerySetting.selectedRatings,
+    currentGallerySetting.selectedDateRange,
     currentGallerySetting.sortOrder,
     currentGallerySetting.tagFilterMode,
   )
 }
 
 export const usePhotos = () => {
-  const { sortOrder, selectedTags, selectedCameras, selectedLenses, selectedRatings, tagFilterMode }
-    = useAtomValue(gallerySettingAtom)
+  const {
+    sortOrder,
+    selectedTags,
+    selectedCameras,
+    selectedLenses,
+    selectedRatings,
+    selectedDateRange,
+    tagFilterMode,
+  } = useAtomValue(gallerySettingAtom)
 
   const masonryItems = useMemo(() => {
-    return filterAndSortPhotos(selectedTags, selectedCameras, selectedLenses, selectedRatings, sortOrder, tagFilterMode)
-  }, [sortOrder, selectedTags, selectedCameras, selectedLenses, selectedRatings, tagFilterMode])
+    return filterAndSortPhotos(
+      selectedTags,
+      selectedCameras,
+      selectedLenses,
+      selectedRatings,
+      selectedDateRange,
+      sortOrder,
+      tagFilterMode,
+    )
+  }, [sortOrder, selectedTags, selectedCameras, selectedLenses, selectedRatings, selectedDateRange, tagFilterMode])
 
   return masonryItems
 }

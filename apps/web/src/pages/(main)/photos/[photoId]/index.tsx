@@ -96,6 +96,8 @@ export const Component = () => {
     }
 
     let isCancelled = false
+    let transitionStyle: HTMLStyleElement | null = null
+    let styleCleanupTimeout: ReturnType<typeof setTimeout> | null = null
 
     ;(async () => {
       try {
@@ -104,16 +106,17 @@ export const Component = () => {
           thumbnailUrl: current.thumbnailUrl,
         })
         if (!isCancelled) {
-          const $css = document.createElement('style')
-          $css.textContent = `
+          transitionStyle = document.createElement('style')
+          transitionStyle.textContent = `
          * {
              transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
             }
           `
-          document.head.append($css)
+          document.head.append(transitionStyle)
 
-          setTimeout(() => {
-            $css.remove()
+          styleCleanupTimeout = setTimeout(() => {
+            transitionStyle?.remove()
+            transitionStyle = null
           }, 100)
 
           setAccentColor(color ?? null)
@@ -128,6 +131,10 @@ export const Component = () => {
 
     return () => {
       isCancelled = true
+      if (styleCleanupTimeout) {
+        clearTimeout(styleCleanupTimeout)
+      }
+      transitionStyle?.remove()
     }
   }, [photoViewer.currentIndex, photos])
 

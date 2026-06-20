@@ -69,8 +69,11 @@ For detailed self-hosting instructions, see [DEVELOPMENT.md](./DEVELOPMENT.md) a
 
 ### EdgeOne Runtime Note
 
-For EdgeOne deployment with KV bindings in this project, use `edge-functions/api/` as the frontend runtime path.
-Browser requests use `/api/*` and the project keeps only the EdgeOne function implementation for reactions and OG metadata.
+For EdgeOne deployment, use `edge-functions/api/` as the frontend runtime path. Browser requests use `/api/*`,
+and the project keeps only the EdgeOne function implementation for reactions and OG metadata.
+
+Photo reactions are stored in the `afilmory` EdgeOne Pages Blob store with strong-consistency reads. No KV
+binding is required, and data from the former KV implementation is intentionally not migrated.
 
 ## 📸 Live Galleries
 

@@ -1,4 +1,5 @@
 import { photoLoader } from '@afilmory/data'
+import { Modal } from '@afilmory/ui'
 import { clsxm } from '@afilmory/utils'
 import { useAtom } from 'jotai'
 import * as React from 'react'
@@ -9,6 +10,8 @@ import { useNavigate } from 'react-router'
 import { gallerySettingAtom } from '~/atoms/app'
 import { usePhotoViewer } from '~/hooks/usePhotoViewer'
 import { MageLens } from '~/icons'
+import { DateRangePicker } from '~/modules/gallery/DateRangePicker'
+import { DATE_RANGE_PRESETS, isPresetActive } from '~/modules/gallery/dateRangeUtils'
 
 // Command types
 type CommandType = 'search' | 'filter' | 'action' | 'photo'
@@ -23,6 +26,9 @@ interface Command {
   keywords?: string[]
   badge?: string | number
   active?: boolean
+  // When true, hide this command from the default (un-queried) list to avoid
+  // crowding existing tag/camera/lens entries; it still surfaces on a matching query.
+  hideFromDefault?: boolean
 }
 
 interface CommandPaletteProps {
@@ -127,6 +133,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
       selectedCameras: [],
       selectedLenses: [],
       selectedRatings: null,
+      selectedDateRange: null,
       tagFilterMode: 'union',
     }))
   }, [setGallerySetting])
@@ -261,12 +268,52 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
       })
     }
 
+    // Filter commands - Date range presets (query-only; hidden from default list).
+    // Compute `today` once per command-list rebuild so endpoints stay consistent.
+    const todayForPresets = new Date()
+    DATE_RANGE_PRESETS.forEach((preset) => {
+      const presetRange = preset.compute(todayForPresets)
+      const isActive = isPresetActive(preset, gallerySetting.selectedDateRange, todayForPresets)
+      cmds.push({
+        id: `date-preset-${preset.id}`,
+        type: 'filter',
+        title: t(preset.labelKey as never),
+        subtitle: t('action.date.filter'),
+        icon: 'i-mingcute-calendar-line',
+        active: isActive,
+        hideFromDefault: true,
+        // Non-toggling: selecting an active preset re-applies the same range (no-op).
+        action: () => {
+          setGallerySetting(prev => ({
+            ...prev,
+            selectedDateRange: presetRange,
+          }))
+        },
+        keywords: preset.keywords,
+      })
+    })
+
+    // Custom date range entry
+    cmds.push({
+      id: 'date-custom',
+      type: 'action',
+      title: t('action.date.custom'),
+      subtitle: t('action.date.filter'),
+      icon: 'i-mingcute-calendar-line',
+      action: () => {
+        onClose()
+        Modal.present(DateRangePicker, undefined, { dismissOnOutsideClick: true })
+      },
+      keywords: ['date', 'range', 'custom', 'picker', 'from', 'to'],
+    })
+
     // Clear all filters
     const hasFilters
       = gallerySetting.selectedTags.length > 0
         || gallerySetting.selectedCameras.length > 0
         || gallerySetting.selectedLenses.length > 0
         || gallerySetting.selectedRatings !== null
+        || gallerySetting.selectedDateRange !== null
 
     if (hasFilters) {
       cmds.push({
@@ -282,6 +329,7 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
             selectedCameras: [],
             selectedLenses: [],
             selectedRatings: null,
+            selectedDateRange: null,
             tagFilterMode: 'union',
           }))
         },
@@ -324,8 +372,8 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   const filteredCommands = useMemo(() => {
     if (!query.trim()) {
       // Show all filters when no query - group by type
-      const activeFilters = commands.filter(cmd => cmd.active)
-      const allFilters = commands.filter(cmd => cmd.type === 'filter')
+      const activeFilters = commands.filter(cmd => cmd.active && !cmd.hideFromDefault)
+      const allFilters = commands.filter(cmd => cmd.type === 'filter' && !cmd.hideFromDefault)
 
       // Prioritize active filters, then show all available filters
       const uniqueFilters = new Map<string, Command>()

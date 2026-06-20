@@ -23,6 +23,7 @@
     "migrate:manifest": "tsx scripts/migrate-manifest.ts",
     "prepare": "simple-git-hooks",
     "reinstall": "rm -rf **/*/node_modules && rm -rf node_modules && pnpm install",
+    "test:edge-functions": "tsx --test tests/edge-functions/*.test.ts",
     "type-check": "pnpm run -r type-check",
     "update:lastmodified": "tsx scripts/update-lastmodified.ts"
   },
@@ -30,6 +31,7 @@
     "@afilmory/builder": "workspace:*",
     "@afilmory/hooks": "workspace:*",
     "@afilmory/ui": "workspace:*",
+    "@edgeone/pages-blob": "0.0.12",
     "@t3-oss/env-core": "catalog:",
     "dotenv": "17.4.2",
     "es-toolkit": "1.47.1",

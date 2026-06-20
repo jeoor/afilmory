@@ -54,6 +54,7 @@ export const Component = () => {
 }
 
 export default Component
+// Route-builder metadata intentionally shares this module with the component.
 // eslint-disable-next-line react-refresh/only-export-components
 export const loader = undefined
 // eslint-disable-next-line react-refresh/only-export-components
