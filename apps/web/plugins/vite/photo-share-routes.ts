@@ -136,7 +136,7 @@ export function createPhotoShareRoutesPlugin(siteConfig: SiteConfig): Plugin {
 
       await $({ cwd: rootDir, stdio: 'inherit' })`tsx scripts/generate-og-map.ts`
     },
-    async closeBundle() {
+    async writeBundle() {
       const outDir = path.resolve(config.root, config.build.outDir)
 
       await copyGeneratedOgImages(outDir)

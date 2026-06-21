@@ -9,8 +9,8 @@ packages:
 minimumReleaseAge: 0
 
 overrides:
-  motion: 12.38.0
-  motion-dom: 12.38.0
+  motion: 12.40.0
+  motion-dom: 12.40.0
   'hono@<4.12.21': ^4.12.21
   'shell-quote@<1.8.4': ^1.8.4
   'qs@<6.15.2': ^6.15.2
@@ -30,7 +30,7 @@ catalog:
   '@types/react': 19.2.17
   '@types/react-dom': 19.2.3
   dotenv-expand: 13.0.0
-  motion: 12.38.0
+  motion: 12.40.0
   satori: 0.26.0
   tailwind-scrollbar: 4.0.2
   tailwind-variants: 3.2.2
