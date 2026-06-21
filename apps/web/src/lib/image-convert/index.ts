@@ -3,6 +3,7 @@
  * 支持多种浏览器原生不支持的图片格式转换
  */
 import { i18nAtom } from '~/i18n'
+import { fileTypeFromBlobLazy } from '~/lib/file-type'
 import { jotaiStore } from '~/lib/jotai'
 
 import type { LoadingCallbacks } from '../image-loader-manager'
@@ -35,7 +36,7 @@ export class ImageConverterManager {
     strategy.getSupportedFormats().forEach((format) => {
       this.strategies.set(format, strategy)
     })
-    console.info(`Registered image converter strategy: ${strategy.getName()}`)
+    // Registered image converter strategy
   }
 
   /**
@@ -43,7 +44,7 @@ export class ImageConverterManager {
    */
   removeStrategy(strategyName: string): boolean {
     let removed = false
-    const strategy = Array.from(this.strategies.values()).find((s) => s.getName() === strategyName)
+    const strategy = Array.from(this.strategies.values()).find(s => s.getName() === strategyName)
 
     if (strategy) {
       strategy.getSupportedFormats().forEach((format) => {
@@ -53,7 +54,7 @@ export class ImageConverterManager {
         }
       })
       if (removed) {
-        console.info(`Removed image converter strategy: ${strategyName}`)
+        // Removed image converter strategy
       }
     }
     return removed
@@ -73,15 +74,14 @@ export class ImageConverterManager {
   async findSuitableStrategy(blob: Blob): Promise<ImageConverterStrategy | null> {
     try {
       // 使用 file-type 检测文件格式
-      const { fileTypeFromBlob } = await import('file-type')
-      const fileType = await fileTypeFromBlob(blob)
+      const fileType = await fileTypeFromBlobLazy(blob)
 
       if (!fileType) {
-        console.info('Could not detect file type with file-type library')
+        // Could not detect file type with file-type library
         return null
       }
 
-      console.info(`Detected file type: ${fileType.ext} (${fileType.mime})`)
+      // Detected file type
 
       // 直接根据 MIME 类型查找策略
       const strategy = this.strategies.get(fileType.mime)
@@ -90,17 +90,19 @@ export class ImageConverterManager {
         // 验证策略是否确实需要转换这个文件
         const shouldConvert = await strategy.shouldConvert(blob)
         if (shouldConvert) {
-          console.info(`Found suitable conversion strategy: ${strategy.getName()}`)
+          // Found suitable conversion strategy
           return strategy
-        } else {
-          console.info(`Strategy ${strategy.getName()} detected but conversion not needed`)
+        }
+        else {
+          // Strategy detected but conversion not needed
           return null
         }
       }
 
-      console.info(`No strategy found for MIME type: ${fileType.mime}`)
+      // No strategy found for MIME type
       return null
-    } catch (error) {
+    }
+    catch (error) {
       console.error('File type detection failed:', error)
       return null
     }
@@ -113,11 +115,11 @@ export class ImageConverterManager {
     const strategy = await this.findSuitableStrategy(blob)
 
     if (!strategy) {
-      console.info('No conversion strategy needed for this image')
+      // No conversion strategy needed for this image
       return null
     }
 
-    console.info(`Converting image using ${strategy.getName()} strategy`)
+    // Converting image using strategy
     const taskKey = this.getConversionTaskKey(strategy, originalUrl)
 
     const onLoadingStateUpdate = callbacks?.onLoadingStateUpdate
@@ -127,7 +129,7 @@ export class ImageConverterManager {
 
     const existingTask = this.pendingConversions.get(taskKey)
     if (existingTask) {
-      console.info(`Joining pending conversion task for ${strategy.getName()} (${originalUrl})`)
+      // Joining pending conversion task
       return await existingTask
     }
 
@@ -147,7 +149,8 @@ export class ImageConverterManager {
           conversionMessage: undefined,
         })
         return await strategy.convert(blob, originalUrl, callbacks)
-      } finally {
+      }
+      finally {
         this.pendingConversions.delete(taskKey)
       }
     })

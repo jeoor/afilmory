@@ -14,7 +14,6 @@ import { analyzer } from 'vite-bundle-analyzer'
 import { checker } from 'vite-plugin-checker'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import { routeBuilderPlugin } from 'vite-plugin-route-builder'
-import tsconfigPaths from 'vite-tsconfig-paths'
 
 import PKG from '../../package.json'
 import { siteConfig } from '../../site.config'
@@ -99,6 +98,7 @@ export default defineConfig(() => {
   return {
     base: BUILD_FOR_SERVER_SERVE ? '/static/web/' : '/',
     resolve: {
+      tsconfigPaths: true,
       alias: {
         'node:fs/promises': path.resolve(__dirname, 'src/lib/node-fs-promises-browser.ts'),
       },
@@ -126,7 +126,6 @@ export default defineConfig(() => {
       }),
 
       astPlugin,
-      tsconfigPaths(),
       checker({
         typescript: true,
         enableBuild: true,
